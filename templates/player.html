@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ nome }}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+    }
+    .player-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    .player-header {
+        background: var(--header-bg);
+        padding: 0 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-color);
+        height: 60px;
+        flex-shrink: 0;
+    }
+    .back-btn {
+        color: var(--text-color);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--hover-bg);
+        padding: 8px 15px;
+        border-radius: 8px;
+    }
+    .course-title-header {
+        margin-left: 20px;
+        font-size: 16px;
+        font-weight: 700;
+        border-left: 1px solid var(--border-color);
+        padding-left: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-color);
+    }
+    .main-content {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        overflow: hidden;
+        background: var(--bg-color);
+    }
+    .video-section {
+        flex: 1;
+        height: 100%;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .video-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .video-wrapper video {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        outline: none;
+    }
+    .playlist-section {
+        width: 380px;
+        max-width: 30%;
+        display: flex;
+        flex-direction: column;
+        background: transparent;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+    }
+    .playlist-header {
+        padding: 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .playlist-header h2 {
+        font-size: 11px;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 800;
+        margin: 0;
+    }
+    .playlist-items {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px 0;
+    }
+    .playlist-items::-webkit-scrollbar { width: 4px; }
+    .playlist-items::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+    
+    .playlist-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 25px;
+        text-decoration: none;
+        color: var(--text-color);
+        opacity: 0.7;
+        transition: all 0.2s;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .playlist-item:hover {
+        background: var(--hover-bg);
+        color: var(--text-color);
+        opacity: 1;
+    }
+    .playlist-item:hover .item-number {
+        color: var(--accent-color);
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    .playlist-item.active {
+        background: rgba(59, 130, 246, 0.12);
+        color: #3b82f6;
+        border-left: 3px solid #3b82f6;
+        opacity: 1;
+    }
+    .playlist-item.active .item-number {
+        color: #3b82f6;
+        opacity: 1;
+    }
+    .item-number {
+        font-size: 12px;
+        font-weight: 700;
+        margin-right: 15px;
+        opacity: 0.8;
+        width: 25px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s;
+        color: var(--text-color);
+    }
+    .item-title {
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--text-color);
+    }
+
+    /* Light theme overrides for player */
+    body.light-theme .playlist-section {
+        border-left-color: var(--border-color);
+        background: var(--sidebar-bg);
+    }
+    body.light-theme .playlist-item {
+        color: var(--text-color);
+        border-bottom-color: var(--border-color);
+    }
+    body.light-theme .playlist-item:hover {
+        background: var(--hover-bg);
+        color: var(--accent-color);
+        opacity: 1;
+    }
+    body.light-theme .playlist-item:hover .item-number {
+        color: var(--accent-color);
+    }
+    body.light-theme .playlist-item.active {
+        color: var(--accent-color);
+        border-left-color: var(--accent-color);
+        background: rgba(45, 90, 36, 0.1);
+    }
+    body.light-theme .playlist-header h2 {
+        color: var(--text-color);
+    }
+    body.light-theme .player-header {
+        background: var(--header-bg);
+        border-bottom-color: var(--border-color);
+    }
+
+    @media (max-width: 991px) {
+        body { overflow: auto; }
+        .player-container { height: auto; }
+        .main-content { flex-direction: column; height: auto; overflow: visible; }
+        .playlist-section { width: 100%; max-width: 100%; border-left: none; border-top: 1px solid var(--border-color); height: auto; }
+        .video-section { height: auto; aspect-ratio: 16/9; }
+    }
+</style>
+</head>
+<body>
+
+<div class="player-container">
+    <header class="player-header">
+        <div style="display: flex; align-items: center;">
+            <div class="course-title-header" style="margin-left: 0; border-left: none; padding-left: 0;">{{ categoria }}</div>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="nav-buttons" style="display: flex; gap: 8px;">
+                <a href="/?openCurso={{ nome_curso | urlencode }}" title="Módulos" style="color: white; text-decoration: none; background: rgba(255,255,255,0.05); border: 1px solid #3e4143; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; font-weight: 700; transition: all 0.3s;">
+                    <span>📚</span> MÓDULOS
+                </a>
+                <button onclick="window.history.back()" title="Voltar" style="background: rgba(255,255,255,0.05); border: 1px solid #3e4143; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; font-weight: 700; transition: all 0.3s;">
+                    <span>↩️</span> VOLTAR
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="video-section">
+            <div class="video-wrapper">
+                <video id="mainVideo" controls autoplay>
+                    <source src="/video/{{ filepath | urlencode }}" type="video/mp4">
+                    Seu navegador não suporta vídeos HTML5.
+                </video>
+            </div>
+        </div>
+
+        <div class="playlist-section" id="playlistSidebar">
+            <div class="playlist-header">
+                <h2>Conteúdo do Curso</h2>
+            </div>
+            
+            <div class="playlist-items">
+                {% for item in playlist %}
+                <a href="/player/{{ item.video.filepath | urlencode }}?categoria={{ item.cat | urlencode }}" 
+                   class="playlist-item {% if item.video.filepath == filepath %}active{% endif %}">
+                    <span class="item-number">{{ "%02d" | format(loop.index) }}</span>
+                    <div class="item-title">{{ item.video.nome }}</div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Aplicar tema salvo no localStorage
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+    }
+
+    function togglePlaylist() {
+        // Script para ajustar o layout se necessário no futuro
+    }
+</script>
+
+</body>
+</html>

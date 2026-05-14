@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursos - YouTube Local</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+
+<header class="header">
+    <div class="logo" style="font-family: 'Times New Roman', Times, serif; font-size: 24px; font-weight: bold; letter-spacing: -0.5px; text-transform: uppercase;">
+        CURSOS
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <!-- Botões de Navegação Rápidos -->
+        <div class="nav-buttons" style="display: flex; gap: 8px; margin-right: 15px;">
+            <button onclick="showHome()" title="Cursos" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.3s;">
+                <span>📚</span> CURSOS
+            </button>
+            <button onclick="window.history.back()" title="Voltar" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.3s;">
+                <span>↩️</span> VOLTAR
+            </button>
+        </div>
+
+        <button onclick="toggleTheme()" style="background: var(--hover-bg); color: var(--text-color); border: 1px solid var(--border-color); font-size: 20px; padding: 5px 10px; cursor: pointer; border-radius: 6px;">🌗</button>
+        <a href="/config" title="Gerenciar Diretórios" style="color: white; text-decoration: none; font-size: 13px; background: var(--accent-color); padding: 8px 18px; border-radius: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
+            <span style="font-size: 18px;">⚙️</span> CONFIGS
+        </a>
+    </div>
+</header>
+
+<div class="app-container">
+    <main class="main-content">
+
+        <!-- Livraria de Cursos (Tela Inicial) -->
+        <section class="welcome-section" id="welcome-section">
+            <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 30px; text-align: center; text-transform: uppercase;">Veja o que você vai aprender</h2>
+            <style>
+                .learning-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                    gap: 12px;
+                }
+                .learning-card {
+                    background: transparent;
+                    border: 1px solid var(--border-color);
+                    border-radius: 12px;
+                    padding: 20px;
+                    cursor: pointer;
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    display: flex;
+                    flex-direction: column;
+                    text-decoration: none;
+                    color: var(--text-color);
+                    position: relative;
+                    transform-style: preserve-3d;
+                    perspective: 1000px;
+                }
+                .learning-card:hover {
+                    border-color: var(--accent-color);
+                    background: rgba(255, 255, 255, 0.08);
+                    color: var(--text-color);
+                    transform: translateY(-8px) scale(1.03) rotateX(2deg);
+                    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+                    z-index: 50;
+                }
+                .card-icon-box {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 8px;
+                    background: var(--hover-bg);
+                    color: var(--accent-color);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                    margin-bottom: 15px;
+                    font-weight: 800;
+                    transition: all 0.3s;
+                }
+                .learning-card:hover .card-icon-box {
+                    background: var(--accent-color);
+                    color: white;
+                }
+                .card-title {
+                    font-size: 14px;
+                    font-weight: 700;
+                    margin: 0 0 5px 0;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    color: var(--text-color);
+                }
+                .card-desc {
+                    font-size: 14px;
+                    opacity: 0.8;
+                    line-height: 1.5;
+                    color: var(--text-color);
+                    margin-bottom: 12px;
+                }
+                .lesson-badge {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 8px;
+                    margin-top: auto;
+                    width: 100%;
+                }
+                .badge-item {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 0;
+                    background: transparent;
+                    border-radius: 0;
+                    font-size: 12px;
+                    font-weight: 800;
+                    color: var(--accent-color);
+                    border: none;
+                    width: fit-content;
+                    opacity: 1;
+                }
+                body.light-theme .badge-item {
+                    color: #2d5a24; /* Even darker green for contrast */
+                }
+                
+                /* Grid específico para as pastas dentro de um curso */
+                .category-grid {
+                    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                    gap: 15px;
+                }
+                .category-grid .learning-card {
+                    padding: 20px;
+                    min-height: 100px;
+                    border-radius: 12px;
+                }
+                .category-grid .card-icon-box {
+                    width: 30px;
+                    height: 30px;
+                    font-size: 20px;
+                    margin-bottom: 10px;
+                }
+                .category-grid .card-title {
+                    font-size: 13px;
+                }
+
+                .category-grid .card-desc {
+                    display: none; 
+                }
+
+                @media (max-width: 600px) {
+                    .learning-grid {
+                        grid-template-columns: 1fr;
+                        gap: 12px;
+                    }
+                    .learning-card {
+                        padding: 15px;
+                    }
+                }
+            </style>
+            
+            <div class="learning-grid home-learning-grid" id="home-learning-grid">
+                {% for curso_data in cursos %}
+                {% set curso = curso_data.name %}
+                {% set cats = curso_data.categorias %}
+                <div class="learning-card folder-card" 
+                     data-path="{{ curso_data.path }}"
+                     onclick="handleCardClick(event, '{{ loop.index }}', '{{ curso | replace('\'', '\\\'') }}')" 
+                     style="padding: 25px; min-height: 180px; align-items: flex-start; cursor: grab;">
+                    
+                    <div class="card-icon-box" style="margin-bottom: 20px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; background: var(--hover-bg); border-radius: 14px; font-weight: 900; font-size: 26px; color: var(--accent-color); position: relative; border: 1px solid var(--border-color);">
+                        {{ curso[0] | upper }}
+                        <i class="devicon-{{ curso | lower | replace(' ', '') }}-plain colored" style="position: absolute; font-size: 40px; background: var(--card-bg); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 14px; opacity: 1;"></i>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                        <h3 class="card-title" style="text-align: left; margin: 0; flex: 1;">{{ curso }}</h3>
+                        <button onclick="startRename(event, this)" style="background: none; border: none; cursor: pointer; opacity: 0.3; font-size: 12px; padding: 5px;">✏️</button>
+                    </div>
+                    
+                    <div class="rename-box" style="display: none; width: 100%; margin-top: 5px; gap: 5px;">
+                        <input type="text" class="rename-input" value="{{ curso }}" style="flex: 1; background: var(--input-bg); border: 1px solid var(--accent-color); color: var(--text-color); border-radius: 4px; padding: 2px 8px; font-size: 13px;">
+                        <button onclick="finishRename(event, this)" style="background: var(--accent-color); color: white; border: none; border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer;">OK</button>
+                    </div>
+
+                    <p class="card-desc" style="text-align: left; margin-top: 10px;">Domine completamente o curso {{ curso }} com acesso a todos os módulos e projetos práticos.</p>
+                    
+                    <div class="lesson-badge">
+                        <div class="badge-item" title="Módulos">
+                            <span>📁</span> {{ cats|length }} MÓDULOS
+                        </div>
+                        <div class="badge-item" title="Total de Aulas">
+                            {% set total_aulas = namespace(count=0) %}
+                            {% for cat, videos in cats.items() %}
+                                {% set total_aulas.count = total_aulas.count + videos|length %}
+                            {% endfor %}
+                            <span>🎬</span> {{ total_aulas.count }} VÍDEOS
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if not cursos %}
+            <div style="text-align: center; padding: 50px; color: #888;">
+                <h2>Nenhum conteúdo encontrado.</h2>
+                <p>Adicione uma pasta nas configurações para começar a organizar seus vídeos!</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Seções dos Cursos Ocultas por Padrão -->
+        {% for curso_data in cursos %}
+        {% set curso = curso_data.name %}
+        {% set cats = curso_data.categorias %}
+        {% set curso_index = loop.index %}
+        <div class="curso-container" id="curso-{{ curso_index }}" data-nome="{{ curso | e }}" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px;">
+                <h2 style="font-size: 28px; text-transform: uppercase;">🎬 {{ curso }}</h2>
+                <button onclick="showHome()" style="background: var(--hover-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">INÍCIO</button>
+            </div>
+            
+            <!-- Grid de Pastas/Módulos -->
+            <div class="learning-grid category-grid" id="grid-curso-{{ curso_index }}">
+                {% for categoria, videos in cats.items() %}
+                {% set cat_index = loop.index %}
+                <div class="learning-card folder-card" onclick="showCategory('{{ curso_index }}', '{{ cat_index }}')" style="position: relative; min-height: 140px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 25px;">
+                    <!-- Espaço para o Ícone da Linguagem -->
+                    <div class="lang-icon" style="font-size: 30px; margin-bottom: 15px; color: var(--accent-color);">
+                        <i class="devicon-{{ categoria | lower | replace(' ', '') }}-plain colored"></i>
+                    </div>
+                    
+                    <h3 class="card-title" style="text-align: left; margin: 0; width: 100%; white-space: normal; font-size: 16px; letter-spacing: 0;">{{ categoria }}</h3>
+                    
+                    <div class="video-count-badge" style="position: absolute; bottom: 15px; right: 15px; font-size: 11px; display: flex; align-items: center; gap: 5px; font-weight: 800; background: var(--hover-bg); padding: 6px 12px; border-radius: 12px; border: 1px solid var(--border-color); color: var(--text-color);">
+                        <span>📽️</span> {{ videos|length }} VÍDEOS
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Vídeos por Categoria (Oculto por padrão) -->
+            {% for categoria, videos in cats.items() %}
+            {% set cat_index = loop.index %}
+            <section class="category-section" id="section-cat-{{ curso_index }}-{{ cat_index }}" style="display: none; margin-bottom: 30px;">
+                <div style="margin-bottom: 20px;">
+                    <button onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}')" style="background: transparent; color: var(--accent-color); border: none; cursor: pointer; font-weight: bold; font-size: 16px;">← Voltar para Módulos</button>
+                </div>
+                <h3 style="color: var(--accent-color); margin-bottom: 20px; font-size: 22px;">{{ categoria }}</h3>
+                <div class="learning-grid">
+                    {% for video in videos %}
+                    <a class="learning-card" href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" style="padding: 20px; border-radius: 12px; border-color: var(--border-color);">
+                        <div style="font-size: 24px; margin-bottom: 10px; color: var(--accent-color);">▶</div>
+                        <div class="card-title" style="font-size: 15px; margin: 0; text-transform: none;">{{ video.nome }}</div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+    </main>
+
+    <div class="resizer" id="dragMe"></div>
+
+    <!-- Menu Lateral Dinâmico -->
+    <aside class="sidebar" id="sidebar">
+        <h3 id="sidebar-title" style="cursor: pointer; font-size: 18px; margin-bottom: 25px; white-space: nowrap; overflow: hidden; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;" onclick="showHome()">🎬 Menu</h3>
+        
+        
+        <div id="sidebar-empty" style="padding: 15px; color: #888; font-size: 14px;">
+            Selecione um curso para começar a aprender.
+        </div>
+
+
+        {% for curso_data in cursos %}
+        {% set curso = curso_data.name %}
+        {% set cats = curso_data.categorias %}
+        {% set curso_index = loop.index %}
+        <ul class="explorer-menu curso-menu" id="menu-curso-{{ curso_index }}" data-nome="{{ curso | e }}" style="display: none;">
+            {% for categoria, videos in cats.items() %}
+            {% set cat_index = loop.index %}
+            <li>
+                <div class="explorer-cat" onclick="toggleSidebarCat('{{ curso_index }}', '{{ cat_index }}', this)" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <span class="cat-arrow" style="font-size: 10px; transition: transform 0.2s; display: inline-block;">▶</span>
+                    <span>{{ categoria }}</span>
+                </div>
+                <ul class="explorer-videos" id="menu-cat-{{ curso_index }}-{{ cat_index }}" style="display: none;">
+                    {% for video in videos %}
+                    <li>
+                        <a href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" title="{{ video.nome }}">
+                            🎬 {{ video.nome }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </aside>
+</div>
+
+<script>
+// THEME TOGGLE
+function toggleTheme() {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+    }
+    
+    // Restaurar estado via Hash ou LocalStorage
+    restoreState();
+});
+
+window.addEventListener('hashchange', restoreState);
+
+function restoreState() {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+        const params = new URLSearchParams(hash);
+        const cursoNome = params.get('curso');
+        const catIndex = params.get('cat');
+        
+        if (cursoNome) {
+            const container = Array.from(document.querySelectorAll('.curso-container')).find(c => c.getAttribute('data-nome').trim() === cursoNome.trim());
+            if (container) {
+                const index = container.id.replace('curso-', '');
+                showCurso(index, cursoNome, true); // true = noScroll
+                if (catIndex) {
+                    showCategory(index, catIndex, true);
+                    
+                    // Abrir também o menu lateral correspondente
+                    const menu = document.getElementById(`menu-cat-${index}-${catIndex}`);
+                    if (menu) {
+                        menu.style.display = "block";
+                        const icon = menu.previousElementSibling.querySelector('.toggle-icon');
+                        if (icon) icon.innerText = "▲";
+                    }
+                }
+                return;
+            }
+        }
+    }
+    
+    // Fallback para LocalStorage se não houver hash
+    const lastIndex = localStorage.getItem('lastCursoIndex');
+    const lastNome = localStorage.getItem('lastCursoNome');
+    const lastCatIndex = localStorage.getItem('lastCatIndex');
+    if (lastIndex && lastNome) {
+        const container = Array.from(document.querySelectorAll('.curso-container')).find(c => c.getAttribute('data-nome').trim() === lastNome.trim());
+        if (container) {
+            const index = container.id.replace('curso-', '');
+            showCurso(index, lastNome, true);
+            if (lastCatIndex) {
+                showCategory(index, lastCatIndex, true);
+                
+                const menu = document.getElementById(`menu-cat-${index}-${lastCatIndex}`);
+                if (menu) {
+                    menu.style.display = "block";
+                    const icon = menu.previousElementSibling.querySelector('.toggle-icon');
+                    if (icon) icon.innerText = "▲";
+                }
+            }
+        }
+    }
+}
+
+// RESIZER LOGIC
+const resizer = document.getElementById('dragMe');
+const sidebar = document.getElementById('sidebar');
+
+let x = 0;
+let w = 0;
+
+const mouseDownHandler = function(e) {
+    x = e.clientX;
+    const sbWidth = window.getComputedStyle(sidebar).width;
+    w = parseInt(sbWidth, 10);
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+    document.body.style.cursor = 'col-resize';
+};
+
+const mouseMoveHandler = function(e) {
+    const dx = x - e.clientX; // Invertido porque a sidebar está à direita
+    sidebar.style.width = `${w + dx}px`;
+};
+
+const mouseUpHandler = function() {
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+    document.body.style.cursor = 'default';
+};
+
+resizer.addEventListener('mousedown', mouseDownHandler);
+function showHome() {
+    localStorage.removeItem('lastCursoIndex');
+    localStorage.removeItem('lastCursoNome');
+    localStorage.removeItem('lastCatIndex');
+    window.location.hash = '';
+    
+    document.getElementById('welcome-section').style.display = 'block';
+    document.getElementById('sidebar-title').innerText = "🎬 Selecione um curso";
+    
+    var cursos = document.querySelectorAll('.curso-container');
+    cursos.forEach(function(c) { c.style.display = 'none'; });
+    
+    var menus = document.querySelectorAll('.curso-menu');
+    menus.forEach(function(m) { m.style.display = 'none'; });
+    
+    document.getElementById('sidebar-empty').style.display = 'block';
+    
+    window.scrollTo(0, 0);
+}
+
+function showCurso(index, cursoNome, noScroll) {
+    localStorage.setItem('lastCursoIndex', index);
+    localStorage.setItem('lastCursoNome', cursoNome);
+    localStorage.removeItem('lastCatIndex');
+    
+    // Atualizar Hash sem disparar o evento hashchange repetidamente
+    const newHash = `curso=${encodeURIComponent(cursoNome)}`;
+    if (window.location.hash !== '#' + newHash) {
+        history.replaceState(null, null, '#' + newHash);
+    }
+    
+    document.getElementById('welcome-section').style.display = 'none';
+    document.getElementById('sidebar-title').innerText = "🎬 " + cursoNome;
+    
+    var cursos = document.querySelectorAll('.curso-container');
+    cursos.forEach(function(c) { c.style.display = 'none'; });
+    document.getElementById('curso-' + index).style.display = 'block';
+    
+    var menus = document.querySelectorAll('.curso-menu');
+    menus.forEach(function(m) { m.style.display = 'none'; });
+    document.getElementById('menu-curso-' + index).style.display = 'block';
+    
+    document.getElementById('sidebar-empty').style.display = 'none';
+    
+    // Mostrar a grade de pastas/módulos e esconder os vídeos
+    const grid = document.getElementById('grid-curso-' + index);
+    if(grid) grid.style.display = 'grid';
+    
+    var catSections = document.querySelectorAll('#curso-' + index + ' .category-section');
+    catSections.forEach(function(sec) {
+        sec.style.display = 'none';
+    });
+
+    // Resetar sidebar
+    var sidebarItems = document.querySelectorAll(`#menu-curso-${index} > li`);
+    sidebarItems.forEach(li => li.style.display = 'block');
+    
+    if (!noScroll) window.scrollTo(0, 0);
+}
+
+function resetSidebar() {
+    const lastCursoIndex = localStorage.getItem('lastCursoIndex');
+    if (lastCursoIndex) {
+        const lastCursoNome = localStorage.getItem('lastCursoNome');
+        showCurso(lastCursoIndex, lastCursoNome);
+    }
+}
+
+function toggleSidebarCat(cursoIndex, catIndex, headerEl) {
+    const submenu = document.getElementById('menu-cat-' + cursoIndex + '-' + catIndex);
+    if (!submenu) return;
+    
+    const isOpen = submenu.style.display === 'block';
+    
+    if (isOpen) {
+        // Just close: collapse sidebar item
+        submenu.style.display = 'none';
+        const arrow = headerEl.querySelector('.cat-arrow');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        headerEl.classList.remove('active-cat');
+    } else {
+        // Open: sync both sides (show video list on left + highlight on right)
+        showCategory(cursoIndex, catIndex);
+    }
+}
+
+function showCategory(cursoIndex, catIndex) {
+    // === LEFT SIDE: show the video list ===
+    const grid = document.getElementById('grid-curso-' + cursoIndex);
+    if (grid) grid.style.display = 'none';
+    
+    document.querySelectorAll('#curso-' + cursoIndex + ' .category-section')
+        .forEach(sec => sec.style.display = 'none');
+    
+    const section = document.getElementById('section-cat-' + cursoIndex + '-' + catIndex);
+    if (section) section.style.display = 'block';
+    
+    // === RIGHT SIDE: highlight and scroll to the active category ===
+    // Remove active class from all categories in this course menu
+    document.querySelectorAll('#menu-curso-' + cursoIndex + ' .explorer-cat')
+        .forEach(cat => {
+            cat.classList.remove('active-cat');
+        });
+    
+    const sidebarMenu = document.getElementById('menu-cat-' + cursoIndex + '-' + catIndex);
+    if (sidebarMenu) {
+        sidebarMenu.style.display = 'block';
+        const catLi = sidebarMenu.closest('li');
+        if (catLi) {
+            const catDiv = catLi.querySelector('.explorer-cat');
+            if (catDiv) {
+                catDiv.classList.add('active-cat');
+                const arrow = catDiv.querySelector('.cat-arrow');
+                if (arrow) arrow.style.transform = 'rotate(90deg)';
+                // Scroll the sidebar to bring the active item into view
+                setTimeout(() => {
+                    catDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 80);
+            }
+        }
+    }
+    
+    window.scrollTo(0, 0);
+}
+
+
+
+function toggleMenu(id, iconElement) {
+    var menu = document.getElementById(id);
+    if (menu.style.display === "none" || menu.style.display === "") {
+        menu.style.display = "block";
+        iconElement.innerText = "▲";
+    } else {
+        menu.style.display = "none";
+        iconElement.innerText = "▼";
+    }
+}
+
+// Suporte para abrir curso específico via URL (usado pelo botão "Cursos" no player)
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const openCurso = urlParams.get('openCurso');
+    if (openCurso) {
+        const containers = document.querySelectorAll('.curso-container');
+        containers.forEach(container => {
+            if (container.getAttribute('data-nome') === openCurso) {
+                const idParts = container.id.split('-');
+                const index = idParts[idParts.length - 1];
+                showCurso(index, openCurso, true);
+                
+                // Limpar o parâmetro da URL para não reabrir ao atualizar
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl + window.location.hash);
+            }
+        });
+    }
+});
+// SORTABLE AND RENAME LOGIC
+document.addEventListener('DOMContentLoaded', function() {
+    const el = document.getElementById('home-learning-grid');
+    if (el) {
+        Sortable.create(el, {
+            animation: 200,
+            ghostClass: 'sortable-ghost',
+            onEnd: function() {
+                saveAllMetadata();
+            }
+        });
+    }
+});
+
+function handleCardClick(e, index, nome) {
+    if (e.target.closest('button') || e.target.closest('input')) return;
+    showCurso(index, nome);
+}
+
+function startRename(e, btn) {
+    e.stopPropagation();
+    const card = btn.closest('.learning-card');
+    card.querySelector('div[style*="display: flex"]').style.display = 'none';
+    card.querySelector('.rename-box').style.display = 'flex';
+    card.querySelector('.rename-input').focus();
+}
+
+function finishRename(e, btn) {
+    e.stopPropagation();
+    const card = btn.closest('.learning-card');
+    const newName = card.querySelector('.rename-input').value;
+    card.querySelector('.card-title').innerText = newName;
+    card.querySelector('div[style*="display: none"]').style.display = 'flex';
+    card.querySelector('.rename-box').style.display = 'none';
+    saveAllMetadata();
+}
+
+function saveAllMetadata() {
+    const cards = document.querySelectorAll('.learning-card.folder-card');
+    const order = [];
+    const names = {};
+    
+    cards.forEach(card => {
+        const path = card.dataset.path;
+        const name = card.querySelector('.card-title').innerText;
+        order.push(path);
+        names[path] = name;
+    });
+
+    fetch('/update_course_metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order, names })
+    }).then(() => {
+        // Silently update or refresh
+    });
+}
+</script>
+
+</body>
+</html>

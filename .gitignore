@@ -1,0 +1,19 @@
+# Compiled executables
+dist/
+build/
+*.spec
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Config with personal paths (don't commit)
+config.json
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
