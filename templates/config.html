@@ -3,194 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gerenciar Diretórios - Cursos</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+<title>Configurações - YouTube Local</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script>
-window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('theme') === 'light') {
-        document.body.classList.add('light-theme');
-    }
-    
-    // Initialize Sortable
-    const el = document.getElementById('folder-list-container');
-    if (el) {
-        Sortable.create(el, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            onEnd: function() {
-                console.log('Order changed');
-            }
-        });
-    }
-});
-</script>
 <style>
-    .sortable-ghost { opacity: 0.4; background: var(--hover-bg) !important; }
-    .folder-item { cursor: grab; }
-    .folder-item:active { cursor: grabbing; }
-    .edit-input { 
-        background: rgba(255,255,255,0.05); 
-        border: 1px solid var(--accent-color); 
-        color: var(--text-color); 
-        padding: 5px 10px; 
-        border-radius: 6px; 
-        font-size: 14px;
+    .config-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    .settings-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: var(--shadow-lg);
+    }
+    .folder-item {
+        background: var(--hover-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px 25px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition);
+        cursor: grab;
+    }
+    .folder-item:hover {
+        border-color: var(--accent-color);
+        transform: scale(1.01);
+    }
+    .folder-info {
         flex: 1;
-        margin-right: 10px;
+    }
+    .folder-name {
+        font-family: 'Outfit', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+    .folder-path {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-family: monospace;
+        margin-top: 4px;
+    }
+    input[type="text"] {
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 14px 20px;
+        color: var(--text-color);
+        font-family: inherit;
+        outline: none;
+        transition: var(--transition);
+    }
+    input[type="text"]:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+    .sortable-ghost {
+        opacity: 0.3;
+        background: var(--accent-color) !important;
     }
 </style>
 </head>
 <body>
 
-<header class="header">
-    <div class="logo" style="font-family: 'Times New Roman', Times, serif; font-size: 24px; font-weight: bold; letter-spacing: -0.5px; text-transform: uppercase;">
-        CURSOS
-    </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="nav-buttons" style="display: flex; gap: 8px; margin-right: 15px;">
-            <a href="/" title="Home" style="color: white; text-decoration: none; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.3s;">
-                <span>🏠</span> HOME
-            </a>
-            <a href="/" title="Cursos" style="color: white; text-decoration: none; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.3s;">
-                <span>📚</span> CURSOS
-            </a>
-            <button onclick="window.history.back()" title="Voltar" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.3s;">
-                <span>↩️</span> VOLTAR
-            </button>
+<div class="player-container">
+    <header class="header">
+        <div class="logo">
+            YOUTUBE<span>LOCAL</span>
         </div>
-        <a href="/config" title="Gerenciar Diretórios" style="color: white; text-decoration: none; font-size: 12px; background: #3b82f6; padding: 8px 15px; border-radius: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; transition: all 0.3s;">
-            <span style="font-size: 16px;">⚙️</span> CONFIGS
-        </a>
-    </div>
-</header>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="nav-buttons" style="display: flex; gap: 10px;">
+                <a href="/" class="btn btn-secondary">
+                    <span>🏠</span> HOME
+                </a>
+                <button onclick="window.history.back()" class="btn btn-secondary">
+                    <span>↩️</span> VOLTAR
+                </button>
+            </div>
+            <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px;">🌗</button>
+        </div>
+    </header>
 
-<div class="app-container" style="justify-content: center; padding: 40px; background: var(--bg-color);">
-    <main class="main-content" style="max-width: 900px; margin: 0 auto; width: 100%; background: transparent;">
-        <section class="settings" style="padding: 20px;">
-            <h2 style="font-size: 28px; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Gerenciar Diretórios</h2>
-            <p style="color: var(--text-color); opacity: 0.6; margin-bottom: 40px; font-size: 15px; line-height: 1.6;">Configure as pastas de origem dos seus vídeos. Cada diretório será organizado automaticamente como um curso na tela inicial.</p>
-            
-            <div class="folder-list">
-                <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #3b82f6; margin-bottom: 20px; font-weight: 800; display: flex; justify-content: space-between; align-items: center;">
-                    Pastas Atuais
-                    <button onclick="saveChanges()" class="btn-add" style="padding: 6px 15px; font-size: 10px; box-shadow: none;">Salvar Ordem e Nomes</button>
-                </h3>
-                <div id="folder-list-container">
-                    {% for item in video_dirs %}
-                    <div class="folder-item" data-path="{{ item.path }}" style="background: transparent; padding: 18px 25px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; border: 1px solid var(--border-color); transition: all 0.3s; position: relative;">
-                        <div style="display: flex; flex-direction: column; flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span class="display-name" style="font-weight: 700; font-size: 16px; color: var(--accent-color);">{{ item.name }}</span>
-                                <button type="button" onclick="toggleEdit(this)" style="background: none; border: none; cursor: pointer; opacity: 0.5; font-size: 12px;">✏️</button>
-                            </div>
-                            <span style="font-size: 11px; opacity: 0.5; font-family: monospace;">📁 {{ item.path }}</span>
-                        </div>
-                        
-                        <div class="edit-controls" style="display: none; flex: 1;">
-                            <input type="text" class="edit-input" value="{{ item.name }}">
-                            <button type="button" onclick="confirmRename(this)" style="background: var(--accent-color); color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 10px; cursor: pointer;">OK</button>
-                        </div>
+    <main class="main-content" style="overflow-y: auto; background: radial-gradient(circle at bottom left, rgba(0, 99, 229, 0.05), transparent 600px);">
+        <div class="config-container">
+            <div class="settings-card">
+                <div style="margin-bottom: 40px;">
+                    <h2 style="font-family: 'Outfit', sans-serif; font-size: 32px; margin-bottom: 10px;">Gerenciar Diretórios</h2>
+                    <p style="color: var(--text-muted); font-size: 15px;">Configure as pastas onde seus vídeos estão armazenados. Cada pasta será tratada como um curso.</p>
+                </div>
 
-                        <form action="/remover_pasta" method="POST" style="margin-left: 15px;">
-                            <input type="hidden" name="pasta" value="{{ item.path }}">
-                            <button type="submit" class="btn-remove" style="background: rgba(229, 9, 20, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; transition: all 0.3s;">Remover</button>
-                        </form>
+                <div class="folder-list">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h3 style="font-family: 'Outfit', sans-serif; font-size: 14px; letter-spacing: 1px; color: var(--accent-color); text-transform: uppercase;">Pastas Ativas</h3>
+                        <button onclick="saveChanges()" class="btn btn-primary" style="padding: 8px 16px; font-size: 11px;">SALVAR ORDEM E NOMES</button>
                     </div>
-                    {% endfor %}
-                </div>
-                {% if not video_dirs %}
-                <div style="background: transparent; padding: 50px; text-align: center; border-radius: 16px; border: 1px dashed var(--border-color);">
-                    <p style="color: var(--text-color); opacity: 0.4; margin: 0; font-size: 16px; font-weight: 500;">Nenhum diretório cadastrado ainda.</p>
-                </div>
-                {% endif %}
-            </div>
 
-            <div style="margin-top: 60px; border-top: 1px solid var(--border-color); padding-top: 40px;">
-                <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #3b82f6; margin-bottom: 25px; font-weight: 800;">Adicionar Novo Diretório</h3>
-                <form action="/adicionar_pasta" method="POST" class="folder-add" id="form-add" style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <input type="text" id="nova_pasta" name="nova_pasta" placeholder="Caminho da pasta..." required style="flex: 1; min-width: 300px; padding: 14px 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.3s;">
-                    <button type="button" class="btn-browse" onclick="procurarPasta()" style="padding: 12px 25px; background: rgba(255,255,255,0.05); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; transition: all 0.3s;">📁 Procurar</button>
-                    <button type="submit" class="btn-add" style="padding: 12px 30px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);">Adicionar</button>
-                </form>
+                    <div id="folder-list-container">
+                        {% for item in video_dirs %}
+                        <div class="folder-item" data-path="{{ item.path }}">
+                            <div class="folder-info">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="display-name folder-name">{{ item.name }}</span>
+                                    <button onclick="toggleEdit(this)" class="btn btn-secondary" style="padding: 4px 8px; font-size: 10px; border: none; background: transparent; opacity: 0.5;">✏️</button>
+                                </div>
+                                <div class="folder-path">{{ item.path }}</div>
+                            </div>
+
+                            <div class="edit-controls" style="display: none; flex: 1; gap: 10px;">
+                                <input type="text" class="edit-input" value="{{ item.name }}" style="flex: 1; padding: 8px 15px; font-size: 14px;">
+                                <button onclick="confirmRename(this)" class="btn btn-primary" style="padding: 8px 15px; font-size: 11px;">OK</button>
+                            </div>
+
+                            <form action="/remover_pasta" method="POST" style="margin: 0;">
+                                <input type="hidden" name="pasta" value="{{ item.path }}">
+                                <button type="submit" class="btn btn-secondary" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.2); font-size: 10px; padding: 8px 15px;">REMOVER</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if not video_dirs %}
+                    <div style="text-align: center; padding: 40px; border: 2px dashed var(--border-color); border-radius: 20px; color: var(--text-muted);">
+                        Nenhum diretório cadastrado.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color);">
+                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 14px; letter-spacing: 1px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 25px;">Adicionar Novo Diretório</h3>
+                    <form action="/adicionar_pasta" method="POST" style="display: flex; gap: 15px;">
+                        <input type="text" id="nova_pasta" name="nova_pasta" placeholder="Caminho da pasta (ex: C:\Videos\CursoPython)" required style="flex: 1;">
+                        <button type="button" class="btn btn-secondary" onclick="procurarPasta()"><span>📁</span> PROCURAR</button>
+                        <button type="submit" class="btn btn-primary">ADICIONAR</button>
+                    </form>
+                </div>
             </div>
-        </section>
+        </div>
     </main>
 </div>
 
 <script>
-function procurarPasta() {
-    var btn = document.querySelector('.btn-browse');
-    var originalText = btn.innerText;
-    btn.innerText = "Aguarde...";
-    fetch('/browse_folder')
-        .then(response => response.text())
-        .then(folder => {
-            if(folder && folder.trim() !== "") {
-                document.getElementById('nova_pasta').value = folder.trim();
-            }
-            btn.innerText = originalText;
-        })
-        .catch(err => {
-            console.error(err);
-            btn.innerText = originalText;
-        });
-}
+    // Theme sync
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+    }
 
-function toggleEdit(btn) {
-    const item = btn.closest('.folder-item');
-    item.querySelector('div:first-child').style.display = 'none';
-    item.querySelector('.edit-controls').style.display = 'flex';
-}
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        const isLight = document.body.classList.contains('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
 
-function confirmRename(btn) {
-    const item = btn.closest('.folder-item');
-    const newName = item.querySelector('.edit-input').value;
-    item.querySelector('.display-name').innerText = newName;
-    item.querySelector('div:first-child').style.display = 'flex';
-    item.querySelector('.edit-controls').style.display = 'none';
-}
-
-function saveChanges() {
-    const items = document.querySelectorAll('.folder-item');
-    const order = [];
-    const names = {};
-    
-    items.forEach(item => {
-        const path = item.dataset.path;
-        const name = item.querySelector('.display-name').innerText;
-        order.push(path);
-        names[path] = name;
+    // Sortable Init
+    document.addEventListener('DOMContentLoaded', () => {
+        const el = document.getElementById('folder-list-container');
+        if (el) {
+            Sortable.create(el, {
+                animation: 250,
+                ghostClass: 'sortable-ghost',
+                handle: '.folder-item'
+            });
+        }
     });
 
-    fetch('/update_course_metadata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order, names })
-    }).then(r => r.json())
-      .then(data => {
-          if(data.status === 'ok') {
-              alert('Alterações salvas com sucesso!');
-              window.location.reload();
-          } else {
-              alert('Erro: ' + data.message);
-          }
-      });
-}
+    function procurarPasta() {
+        const btn = event.currentTarget;
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = "<span>⌛</span> AGUARDE...";
+        fetch('/browse_folder')
+            .then(r => r.text())
+            .then(folder => {
+                if(folder && folder.trim()) {
+                    document.getElementById('nova_pasta').value = folder.trim();
+                }
+                btn.innerHTML = originalContent;
+            });
+    }
 
-// Hover effects for buttons
-document.querySelectorAll('.btn-remove').forEach(btn => {
-    btn.onmouseover = () => { btn.style.background = '#ef4444'; btn.style.color = 'white'; };
-    btn.onmouseout = () => { btn.style.background = 'rgba(229, 9, 20, 0.1)'; btn.style.color = '#ef4444'; };
-});
-document.querySelectorAll('.btn-browse').forEach(btn => {
-    btn.onmouseover = () => { btn.style.background = 'rgba(255,255,255,0.1)'; };
-    btn.onmouseout = () => { btn.style.background = 'rgba(255,255,255,0.05)'; };
-});
-document.querySelectorAll('.btn-add').forEach(btn => {
-    btn.onmouseover = () => { btn.style.transform = 'translateY(-2px)'; btn.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)'; };
-    btn.onmouseout = () => { btn.style.transform = 'translateY(0)'; btn.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.3)'; };
-});
+    function toggleEdit(btn) {
+        const item = btn.closest('.folder-item');
+        item.querySelector('.folder-info').style.display = 'none';
+        item.querySelector('.edit-controls').style.display = 'flex';
+    }
+
+    function confirmRename(btn) {
+        const item = btn.closest('.folder-item');
+        const newName = item.querySelector('.edit-input').value;
+        item.querySelector('.display-name').innerText = newName;
+        item.querySelector('.folder-info').style.display = 'block';
+        item.querySelector('.edit-controls').style.display = 'none';
+    }
+
+    function saveChanges() {
+        const items = document.querySelectorAll('.folder-item');
+        const order = [];
+        const names = {};
+        items.forEach(item => {
+            const path = item.dataset.path;
+            const name = item.querySelector('.display-name').innerText;
+            order.push(path);
+            names[path] = name;
+        });
+
+        fetch('/update_course_metadata', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order, names })
+        }).then(r => r.json()).then(data => {
+            if(data.status === 'ok') {
+                alert('Alterações salvas com sucesso!');
+                window.location.reload();
+            }
+        });
+    }
 </script>
 
 </body>

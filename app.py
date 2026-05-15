@@ -254,9 +254,17 @@ def browse_folder():
             cmd = [sys.executable, '--pick-folder']
         else:
             cmd = [sys.executable, sys.argv[0], '--pick-folder']
-        result = subprocess.check_output(cmd, text=True, creationflags=0x08000000)
+            
+        kwargs = {'text': True}
+        if os.name == 'nt':  # Windows
+            kwargs['creationflags'] = 0x08000000
+            
+        result = subprocess.check_output(cmd, **kwargs)
         return result.strip()
     except Exception as e:
+        import traceback
+        with open('error_browse.log', 'w') as f:
+            f.write(traceback.format_exc())
         return ""
 
 @app.route('/video/<path:filepath>')
