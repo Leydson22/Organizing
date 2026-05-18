@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cursos - YouTube Local</title>
+    <title>Cursos - ScanVid</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
@@ -13,27 +13,13 @@
 
 <header class="header">
     <div class="logo" onclick="showHome()" style="cursor: pointer;">
-        YOUTUBE<span>LOCAL</span>
+        SCAN<span>VID</span>
     </div>
 
     <div style="display: flex; align-items: center; gap: 15px;">
-        <div class="nav-buttons" style="display: flex; gap: 10px; align-items: center;">
-            <button onclick="showHome()" class="btn btn-secondary" title="Início">
-                <span>🏠</span> INÍCIO
-            </button>
-            <button onclick="window.history.back()" class="btn btn-secondary" title="Voltar">
-                <span>↩️</span> VOLTAR
-            </button>
-            
-            <!-- Global dynamic breadcrumbs -->
-            <button id="global-btn-back-modules" class="btn btn-secondary" style="display: none;" title="Voltar para Módulos">
-                <span>←</span> MÓDULOS
-            </button>
-            <span class="nav-breadcrumb-separator" id="global-sep-subcat" style="display: none; color: var(--text-muted); opacity: 0.4; font-size: 18px;">›</span>
-            <button id="global-btn-back-subcat" class="btn btn-secondary" style="display: none;" title="Voltar para Categoria">
-                <span>←</span> CATEGORIA
-            </button>
-        </div>
+        <button onclick="showHome()" class="btn btn-secondary" title="Início">
+            <span>🏠</span> INÍCIO
+        </button>
 
         <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px; height: 42px;">🌗</button>
         
@@ -103,8 +89,38 @@
         {% set cats = curso_data.categorias %}
         {% set curso_index = loop.index %}
         <div class="curso-container" id="curso-{{ curso_index }}" data-nome="{{ curso | e }}" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
-                <h2 style="font-size: 32px; font-family: 'Outfit', sans-serif;">{{ curso }}</h2>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; position: relative;">
+                <button onclick="toggleNavMenu('{{ curso_index }}', event)" class="btn btn-secondary" style="padding: 10px; border-radius: 12px; height: 42px; width: 42px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;" title="Caminho de Navegação">
+                    ☰
+                </button>
+                <h2 style="font-size: 32px; font-family: 'Outfit', sans-serif; font-weight: 800; margin: 0;">{{ curso }}</h2>
+                
+                <!-- Menu Flutuante de Navegação -->
+                <div id="nav-menu-{{ curso_index }}" class="floating-nav-menu" style="display: none;">
+                    <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Caminho de Navegação</h4>
+                    <ul>
+                        <li>
+                            <a href="javascript:void(0)" onclick="showHome(); closeNavMenu('{{ curso_index }}')">
+                                <span>🏠</span> INÍCIO
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}'); closeNavMenu('{{ curso_index }}')">
+                                <span>📚</span> MÓDULOS
+                            </a>
+                        </li>
+                        <li id="nav-menu-cat-item-{{ curso_index }}" style="display: none;">
+                            <a id="nav-menu-cat-link-{{ curso_index }}" href="javascript:void(0)">
+                                <span>📂</span> <span class="cat-name-placeholder">CATEGORIA</span>
+                            </a>
+                        </li>
+                        <li id="nav-menu-subcat-item-{{ curso_index }}" style="display: none; padding: 6px 10px;">
+                            <span style="display: flex; align-items: center; gap: 10px; color: var(--accent-color); font-size: 14px; font-weight: 700;">
+                                <span>📁</span> <span class="subcat-name-placeholder">SUBCATEGORIA</span>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
             </div>
             
             <!-- Grid de Pastas/Módulos -->
@@ -144,7 +160,7 @@
                         {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
                         {% if subcategoria %}
                         {% set sub_idx.val = sub_idx.val + 1 %}
-                        <div class="learning-card folder-card" onclick="showSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx.val }}', '{{ categoria | replace('\'', '\\\'') }}')" style="min-height: 160px; justify-content: center;">
+                        <div class="learning-card folder-card" onclick="showSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx.val }}', '{{ categoria | replace('\'', '\\\'') }}', '{{ subcategoria | replace('\'', '\\\'') }}')" style="min-height: 160px; justify-content: center;">
                             <div style="font-size: 40px; color: var(--accent-color); margin-bottom: 10px;">📁</div>
                             <h3 class="card-title" style="font-size: 16px;">{{ subcategoria }}</h3>
                             <div class="badge-item" style="position: absolute; bottom: 20px; right: 20px;">
@@ -362,10 +378,8 @@ function showHome() {
     
     document.getElementById('sidebar-empty').style.display = 'block';
     
-    // Hide global header back buttons
-    document.getElementById('global-btn-back-modules').style.display = 'none';
-    document.getElementById('global-sep-subcat').style.display = 'none';
-    document.getElementById('global-btn-back-subcat').style.display = 'none';
+    // Hide all floating nav menus
+    document.querySelectorAll('.floating-nav-menu').forEach(m => m.style.display = 'none');
     
     window.scrollTo(0, 0);
 }
@@ -407,10 +421,11 @@ function showCurso(index, cursoNome, noScroll) {
     var sidebarItems = document.querySelectorAll(`#menu-curso-${index} > li`);
     sidebarItems.forEach(li => li.style.display = 'block');
     
-    // Hide global header back buttons
-    document.getElementById('global-btn-back-modules').style.display = 'none';
-    document.getElementById('global-sep-subcat').style.display = 'none';
-    document.getElementById('global-btn-back-subcat').style.display = 'none';
+    // Hide dynamic subcat elements from floating menu
+    const catItem = document.getElementById('nav-menu-cat-item-' + index);
+    const subcatItem = document.getElementById('nav-menu-subcat-item-' + index);
+    if (catItem) catItem.style.display = 'none';
+    if (subcatItem) subcatItem.style.display = 'none';
     
     if (!noScroll) window.scrollTo(0, 0);
 }
@@ -458,16 +473,26 @@ function showCategory(cursoIndex, catIndex) {
         if (catContent) catContent.style.display = 'block';
     }
     
-    // Show global back modules button in top header
-    const globalModBtn = document.getElementById('global-btn-back-modules');
-    if (globalModBtn) {
-        globalModBtn.style.display = 'inline-flex';
-        globalModBtn.onclick = function() {
-            showCurso(cursoIndex, localStorage.getItem('lastCursoNome') || '');
-        };
+    // Sync the floating navigation menu for Category level!
+    const catItem = document.getElementById('nav-menu-cat-item-' + cursoIndex);
+    const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
+    if (catItem) {
+        catItem.style.display = 'block';
+        let catName = "CATEGORIA";
+        const h3 = section ? section.querySelector('h3') : null;
+        if (h3) catName = h3.innerText;
+        
+        const link = document.getElementById('nav-menu-cat-link-' + cursoIndex);
+        const nameSpan = catItem.querySelector('.cat-name-placeholder');
+        if (nameSpan) nameSpan.innerText = catName.toUpperCase();
+        if (link) {
+            link.onclick = function() {
+                showCategory(cursoIndex, catIndex);
+                closeNavMenu(cursoIndex);
+            };
+        }
     }
-    document.getElementById('global-sep-subcat').style.display = 'none';
-    document.getElementById('global-btn-back-subcat').style.display = 'none';
+    if (subcatItem) subcatItem.style.display = 'none';
     
     // === RIGHT SIDE: highlight and scroll to the active category ===
     // Remove active class from all categories in this course menu
@@ -497,7 +522,7 @@ function showCategory(cursoIndex, catIndex) {
     window.scrollTo(0, 0);
 }
 
-function showSubcat(cursoIndex, catIndex, subcatIndex, catName) {
+function showSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName) {
     // Hide the category content (subfolder cards + direct videos)
     const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
     if (catContent) catContent.style.display = 'none';
@@ -512,15 +537,25 @@ function showSubcat(cursoIndex, catIndex, subcatIndex, catName) {
     const subcatEl = document.getElementById('subcat-' + cursoIndex + '-' + catIndex + '-' + subcatIndex);
     if (subcatEl) subcatEl.style.display = 'block';
     
-    // Show dynamic header back buttons in top header side-by-side!
-    document.getElementById('global-sep-subcat').style.display = 'inline';
-    const globalSubBtn = document.getElementById('global-btn-back-subcat');
-    if (globalSubBtn) {
-        globalSubBtn.style.display = 'inline-flex';
-        globalSubBtn.innerHTML = `<span>←</span> ${catName.toUpperCase()}`;
-        globalSubBtn.onclick = function() {
-            hideSubcat(cursoIndex, catIndex);
-        };
+    // Sync floating navigation menu for Subcategory level!
+    const catItem = document.getElementById('nav-menu-cat-item-' + cursoIndex);
+    const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
+    if (catItem) {
+        catItem.style.display = 'block';
+        const nameSpan = catItem.querySelector('.cat-name-placeholder');
+        if (nameSpan) nameSpan.innerText = catName.toUpperCase();
+        const link = document.getElementById('nav-menu-cat-link-' + cursoIndex);
+        if (link) {
+            link.onclick = function() {
+                showCategory(cursoIndex, catIndex);
+                closeNavMenu(cursoIndex);
+            };
+        }
+    }
+    if (subcatItem) {
+        subcatItem.style.display = 'block';
+        const nameSpan = subcatItem.querySelector('.subcat-name-placeholder');
+        if (nameSpan) nameSpan.innerText = subcatName.toUpperCase();
     }
     
     window.scrollTo(0, 0);
@@ -537,9 +572,9 @@ function hideSubcat(cursoIndex, catIndex) {
     const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
     if (catContent) catContent.style.display = 'block';
     
-    // Hide dynamic subcat buttons in the top header
-    document.getElementById('global-sep-subcat').style.display = 'none';
-    document.getElementById('global-btn-back-subcat').style.display = 'none';
+    // Hide subcat item from floating menu
+    const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
+    if (subcatItem) subcatItem.style.display = 'none';
     
     window.scrollTo(0, 0);
 }
@@ -632,6 +667,33 @@ function saveAllMetadata() {
         // Silently update or refresh
     });
 }
+
+function toggleNavMenu(cursoIndex, event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById('nav-menu-' + cursoIndex);
+    if (menu) {
+        const isHidden = menu.style.display === 'none';
+        // Close all other menus first
+        document.querySelectorAll('.floating-nav-menu').forEach(m => m.style.display = 'none');
+        if (isHidden) {
+            menu.style.display = 'block';
+        } else {
+            menu.style.display = 'none';
+        }
+    }
+}
+
+function closeNavMenu(cursoIndex) {
+    const menu = document.getElementById('nav-menu-' + cursoIndex);
+    if (menu) menu.style.display = 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.floating-nav-menu') && !event.target.closest('button[onclick*="toggleNavMenu"]')) {
+        document.querySelectorAll('.floating-nav-menu').forEach(m => m.style.display = 'none');
+    }
+});
 </script>
 
 </body>
