@@ -12,21 +12,30 @@
 <body>
 
 <header class="header">
-    <div class="logo">
+    <div class="logo" onclick="showHome()" style="cursor: pointer;">
         YOUTUBE<span>LOCAL</span>
     </div>
 
     <div style="display: flex; align-items: center; gap: 15px;">
-        <div class="nav-buttons" style="display: flex; gap: 10px;">
+        <div class="nav-buttons" style="display: flex; gap: 10px; align-items: center;">
             <button onclick="showHome()" class="btn btn-secondary" title="Início">
                 <span>🏠</span> INÍCIO
             </button>
             <button onclick="window.history.back()" class="btn btn-secondary" title="Voltar">
                 <span>↩️</span> VOLTAR
             </button>
+            
+            <!-- Global dynamic breadcrumbs -->
+            <button id="global-btn-back-modules" class="btn btn-secondary" style="display: none;" title="Voltar para Módulos">
+                <span>←</span> MÓDULOS
+            </button>
+            <span class="nav-breadcrumb-separator" id="global-sep-subcat" style="display: none; color: var(--text-muted); opacity: 0.4; font-size: 18px;">›</span>
+            <button id="global-btn-back-subcat" class="btn btn-secondary" style="display: none;" title="Voltar para Categoria">
+                <span>←</span> CATEGORIA
+            </button>
         </div>
 
-        <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px;">🌗</button>
+        <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px; height: 42px;">🌗</button>
         
         <a href="/config" class="btn btn-primary" title="Configurações">
             <span>⚙️</span> CONFIGS
@@ -120,15 +129,6 @@
             {% for categoria, videos in cats.items() %}
             {% set cat_index = loop.index %}
             <section class="category-section" id="section-cat-{{ curso_index }}-{{ cat_index }}" style="display: none; animation: fadeIn 0.4s ease;">
-                <div class="nav-breadcrumb">
-                    <button onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}')" class="nav-back-btn">
-                        ← Voltar para Módulos
-                    </button>
-                    <span class="nav-breadcrumb-separator" id="sep-cat-{{ curso_index }}-{{ cat_index }}" style="display: none;">›</span>
-                    <button id="btn-back-cat-{{ curso_index }}-{{ cat_index }}" onclick="hideSubcat('{{ curso_index }}', '{{ cat_index }}')" class="nav-back-btn" style="display: none;">
-                        ← Voltar para {{ categoria }}
-                    </button>
-                </div>
                 <h3 style="color: var(--accent-color); margin-bottom: 30px; font-size: 24px; font-family: 'Outfit', sans-serif;">{{ categoria }}</h3>
                 
                 <!-- Subfolder cards + direct videos -->
@@ -144,7 +144,7 @@
                         {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
                         {% if subcategoria %}
                         {% set sub_idx.val = sub_idx.val + 1 %}
-                        <div class="learning-card folder-card" onclick="showSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx.val }}')" style="min-height: 160px; justify-content: center;">
+                        <div class="learning-card folder-card" onclick="showSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx.val }}', '{{ categoria | replace('\'', '\\\'') }}')" style="min-height: 160px; justify-content: center;">
                             <div style="font-size: 40px; color: var(--accent-color); margin-bottom: 10px;">📁</div>
                             <h3 class="card-title" style="font-size: 16px;">{{ subcategoria }}</h3>
                             <div class="badge-item" style="position: absolute; bottom: 20px; right: 20px;">
@@ -362,6 +362,11 @@ function showHome() {
     
     document.getElementById('sidebar-empty').style.display = 'block';
     
+    // Hide global header back buttons
+    document.getElementById('global-btn-back-modules').style.display = 'none';
+    document.getElementById('global-sep-subcat').style.display = 'none';
+    document.getElementById('global-btn-back-subcat').style.display = 'none';
+    
     window.scrollTo(0, 0);
 }
 
@@ -401,6 +406,11 @@ function showCurso(index, cursoNome, noScroll) {
     // Resetar sidebar
     var sidebarItems = document.querySelectorAll(`#menu-curso-${index} > li`);
     sidebarItems.forEach(li => li.style.display = 'block');
+    
+    // Hide global header back buttons
+    document.getElementById('global-btn-back-modules').style.display = 'none';
+    document.getElementById('global-sep-subcat').style.display = 'none';
+    document.getElementById('global-btn-back-subcat').style.display = 'none';
     
     if (!noScroll) window.scrollTo(0, 0);
 }
@@ -446,12 +456,18 @@ function showCategory(cursoIndex, catIndex) {
         section.querySelectorAll('.subcat-section').forEach(s => s.style.display = 'none');
         const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
         if (catContent) catContent.style.display = 'block';
-        // Reset breadcrumb
-        const backBtn = document.getElementById('btn-back-cat-' + cursoIndex + '-' + catIndex);
-        const sep = document.getElementById('sep-cat-' + cursoIndex + '-' + catIndex);
-        if (backBtn) backBtn.style.display = 'none';
-        if (sep) sep.style.display = 'none';
     }
+    
+    // Show global back modules button in top header
+    const globalModBtn = document.getElementById('global-btn-back-modules');
+    if (globalModBtn) {
+        globalModBtn.style.display = 'inline-flex';
+        globalModBtn.onclick = function() {
+            showCurso(cursoIndex, localStorage.getItem('lastCursoNome') || '');
+        };
+    }
+    document.getElementById('global-sep-subcat').style.display = 'none';
+    document.getElementById('global-btn-back-subcat').style.display = 'none';
     
     // === RIGHT SIDE: highlight and scroll to the active category ===
     // Remove active class from all categories in this course menu
@@ -481,7 +497,7 @@ function showCategory(cursoIndex, catIndex) {
     window.scrollTo(0, 0);
 }
 
-function showSubcat(cursoIndex, catIndex, subcatIndex) {
+function showSubcat(cursoIndex, catIndex, subcatIndex, catName) {
     // Hide the category content (subfolder cards + direct videos)
     const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
     if (catContent) catContent.style.display = 'none';
@@ -496,11 +512,16 @@ function showSubcat(cursoIndex, catIndex, subcatIndex) {
     const subcatEl = document.getElementById('subcat-' + cursoIndex + '-' + catIndex + '-' + subcatIndex);
     if (subcatEl) subcatEl.style.display = 'block';
     
-    // Show the breadcrumb back button
-    const backBtn = document.getElementById('btn-back-cat-' + cursoIndex + '-' + catIndex);
-    const sep = document.getElementById('sep-cat-' + cursoIndex + '-' + catIndex);
-    if (backBtn) backBtn.style.display = 'inline-flex';
-    if (sep) sep.style.display = 'inline';
+    // Show dynamic header back buttons in top header side-by-side!
+    document.getElementById('global-sep-subcat').style.display = 'inline';
+    const globalSubBtn = document.getElementById('global-btn-back-subcat');
+    if (globalSubBtn) {
+        globalSubBtn.style.display = 'inline-flex';
+        globalSubBtn.innerHTML = `<span>←</span> ${catName.toUpperCase()}`;
+        globalSubBtn.onclick = function() {
+            hideSubcat(cursoIndex, catIndex);
+        };
+    }
     
     window.scrollTo(0, 0);
 }
@@ -516,11 +537,9 @@ function hideSubcat(cursoIndex, catIndex) {
     const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
     if (catContent) catContent.style.display = 'block';
     
-    // Hide the breadcrumb back button
-    const backBtn = document.getElementById('btn-back-cat-' + cursoIndex + '-' + catIndex);
-    const sep = document.getElementById('sep-cat-' + cursoIndex + '-' + catIndex);
-    if (backBtn) backBtn.style.display = 'none';
-    if (sep) sep.style.display = 'none';
+    // Hide dynamic subcat buttons in the top header
+    document.getElementById('global-sep-subcat').style.display = 'none';
+    document.getElementById('global-btn-back-subcat').style.display = 'none';
     
     window.scrollTo(0, 0);
 }
