@@ -25,24 +25,30 @@
     --shadow-lg: 0 16px 32px rgba(0,0,0,0.4);
     
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --text-gradient-start: #ffffff;
+    --text-gradient-end: #a0a0a0;
 }
 
 body.light-theme {
-    /* Sand & Sage Light Theme */
-    --bg-color: #f5f5f4;
-    --header-bg: rgba(245, 245, 244, 0.85);
-    --sidebar-bg: #e7e5e4;
+    /* Premium Cool Slate Light Theme */
+    --bg-color: #f1f5f9; /* Slate 100 - clear soft background */
+    --header-bg: rgba(241, 245, 249, 0.85);
+    --sidebar-bg: #e2e8f0; /* Slate 200 - darker for clear structure */
     --card-bg: #ffffff;
-    --border-color: #d6d3d1;
-    --accent-color: #15803d; /* Sage Green */
-    --accent-glow: rgba(21, 128, 61, 0.2);
-    --text-color: #44403c;
-    --text-muted: #78716c;
+    --border-color: #cbd5e1; /* Slate 300 - high contrast separator */
+    --accent-color: #0063e5; /* Premium Royal Blue for high legibility */
+    --accent-glow: rgba(0, 99, 229, 0.15);
+    --text-color: #0f172a; /* Slate 900 - maximum contrast for text */
+    --text-muted: #475569; /* Slate 600 - very readable muted text */
     --input-bg: #ffffff;
-    --hover-bg: rgba(0, 0, 0, 0.05);
+    --hover-bg: rgba(0, 0, 0, 0.04);
     
-    --glass-bg: rgba(255, 255, 255, 0.4);
-    --glass-border: rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    
+    --text-gradient-start: #0f172a;
+    --text-gradient-end: #334155;
 }
 
 /* Animations */
@@ -388,7 +394,7 @@ body {
 }
 
 .text-gradient {
-    background: linear-gradient(to right, #fff, #a0a0a0);
+    background: linear-gradient(to right, var(--text-gradient-start), var(--text-gradient-end));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
