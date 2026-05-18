@@ -97,14 +97,14 @@
                 
                 <!-- Menu Flutuante de Navegação -->
                 <div id="nav-menu-{{ curso_index }}" class="floating-nav-menu" style="display: none;">
-                    <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Caminho de Navegação</h4>
+                    <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Navegação</h4>
                     <ul>
-                        <li>
+                        <li id="nav-menu-home-item-{{ curso_index }}">
                             <a href="javascript:void(0)" onclick="showHome(); closeNavMenu('{{ curso_index }}')">
                                 <span>🏠</span> INÍCIO
                             </a>
                         </li>
-                        <li>
+                        <li id="nav-menu-modules-item-{{ curso_index }}">
                             <a href="javascript:void(0)" onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}'); closeNavMenu('{{ curso_index }}')">
                                 <span>📚</span> MÓDULOS
                             </a>
@@ -421,9 +421,11 @@ function showCurso(index, cursoNome, noScroll) {
     var sidebarItems = document.querySelectorAll(`#menu-curso-${index} > li`);
     sidebarItems.forEach(li => li.style.display = 'block');
     
-    // Hide dynamic subcat elements from floating menu
+    // Hide modules item and dynamic category/subcategory elements from floating menu since we are on the course home (modules grid)
+    const modulesItem = document.getElementById('nav-menu-modules-item-' + index);
     const catItem = document.getElementById('nav-menu-cat-item-' + index);
     const subcatItem = document.getElementById('nav-menu-subcat-item-' + index);
+    if (modulesItem) modulesItem.style.display = 'none';
     if (catItem) catItem.style.display = 'none';
     if (subcatItem) subcatItem.style.display = 'none';
     
@@ -474,10 +476,13 @@ function showCategory(cursoIndex, catIndex) {
     }
     
     // Sync the floating navigation menu for Category level!
+    const modulesItem = document.getElementById('nav-menu-modules-item-' + cursoIndex);
+    if (modulesItem) modulesItem.style.display = 'block';
+    
     const catItem = document.getElementById('nav-menu-cat-item-' + cursoIndex);
     const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
     if (catItem) {
-        catItem.style.display = 'block';
+        catItem.style.display = 'none'; // Current level, hide it!
         let catName = "CATEGORIA";
         const h3 = section ? section.querySelector('h3') : null;
         if (h3) catName = h3.innerText;
@@ -538,10 +543,13 @@ function showSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName) {
     if (subcatEl) subcatEl.style.display = 'block';
     
     // Sync floating navigation menu for Subcategory level!
+    const modulesItem = document.getElementById('nav-menu-modules-item-' + cursoIndex);
+    if (modulesItem) modulesItem.style.display = 'block';
+    
     const catItem = document.getElementById('nav-menu-cat-item-' + cursoIndex);
     const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
     if (catItem) {
-        catItem.style.display = 'block';
+        catItem.style.display = 'block'; // Parent level, show it!
         const nameSpan = catItem.querySelector('.cat-name-placeholder');
         if (nameSpan) nameSpan.innerText = catName.toUpperCase();
         const link = document.getElementById('nav-menu-cat-link-' + cursoIndex);
@@ -553,7 +561,7 @@ function showSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName) {
         }
     }
     if (subcatItem) {
-        subcatItem.style.display = 'block';
+        subcatItem.style.display = 'none'; // Current level, hide it!
         const nameSpan = subcatItem.querySelector('.subcat-name-placeholder');
         if (nameSpan) nameSpan.innerText = subcatName.toUpperCase();
     }
