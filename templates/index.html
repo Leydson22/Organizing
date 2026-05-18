@@ -12,24 +12,24 @@
 <body>
 
 <header class="header">
-    <div class="logo" style="font-family: 'Times New Roman', Times, serif; font-size: 24px; font-weight: bold; letter-spacing: -0.5px; text-transform: uppercase;">
-        CURSOS
+    <div class="logo">
+        YOUTUBE<span>LOCAL</span>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <!-- Botões de Navegação Rápidos -->
-        <div class="nav-buttons" style="display: flex; gap: 8px; margin-right: 15px;">
-            <button onclick="showHome()" title="Cursos" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.3s;">
-                <span>📚</span> CURSOS
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="nav-buttons" style="display: flex; gap: 10px;">
+            <button onclick="showHome()" class="btn btn-secondary" title="Início">
+                <span>🏠</span> INÍCIO
             </button>
-            <button onclick="window.history.back()" title="Voltar" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.3s;">
+            <button onclick="window.history.back()" class="btn btn-secondary" title="Voltar">
                 <span>↩️</span> VOLTAR
             </button>
         </div>
 
-        <button onclick="toggleTheme()" style="background: var(--hover-bg); color: var(--text-color); border: 1px solid var(--border-color); font-size: 20px; padding: 5px 10px; cursor: pointer; border-radius: 6px;">🌗</button>
-        <a href="/config" title="Gerenciar Diretórios" style="color: white; text-decoration: none; font-size: 13px; background: var(--accent-color); padding: 8px 18px; border-radius: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
-            <span style="font-size: 18px;">⚙️</span> CONFIGS
+        <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px;">🌗</button>
+        
+        <a href="/config" class="btn btn-primary" title="Configurações">
+            <span>⚙️</span> CONFIGS
         </a>
     </div>
 </header>
@@ -37,131 +37,8 @@
 <div class="app-container">
     <main class="main-content">
 
-        <!-- Livraria de Cursos (Tela Inicial) -->
         <section class="welcome-section" id="welcome-section">
-            <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 30px; text-align: center; text-transform: uppercase;">Veja o que você vai aprender</h2>
-            <style>
-                .learning-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                    gap: 12px;
-                }
-                .learning-card {
-                    background: transparent;
-                    border: 1px solid var(--border-color);
-                    border-radius: 12px;
-                    padding: 20px;
-                    cursor: pointer;
-                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                    display: flex;
-                    flex-direction: column;
-                    text-decoration: none;
-                    color: var(--text-color);
-                    position: relative;
-                    transform-style: preserve-3d;
-                    perspective: 1000px;
-                }
-                .learning-card:hover {
-                    border-color: var(--accent-color);
-                    background: rgba(255, 255, 255, 0.08);
-                    color: var(--text-color);
-                    transform: translateY(-8px) scale(1.03) rotateX(2deg);
-                    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-                    z-index: 50;
-                }
-                .card-icon-box {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 8px;
-                    background: var(--hover-bg);
-                    color: var(--accent-color);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 18px;
-                    margin-bottom: 15px;
-                    font-weight: 800;
-                    transition: all 0.3s;
-                }
-                .learning-card:hover .card-icon-box {
-                    background: var(--accent-color);
-                    color: white;
-                }
-                .card-title {
-                    font-size: 14px;
-                    font-weight: 700;
-                    margin: 0 0 5px 0;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    color: var(--text-color);
-                }
-                .card-desc {
-                    font-size: 14px;
-                    opacity: 0.8;
-                    line-height: 1.5;
-                    color: var(--text-color);
-                    margin-bottom: 12px;
-                }
-                .lesson-badge {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 8px;
-                    margin-top: auto;
-                    width: 100%;
-                }
-                .badge-item {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 0;
-                    background: transparent;
-                    border-radius: 0;
-                    font-size: 12px;
-                    font-weight: 800;
-                    color: var(--accent-color);
-                    border: none;
-                    width: fit-content;
-                    opacity: 1;
-                }
-                body.light-theme .badge-item {
-                    color: #2d5a24; /* Even darker green for contrast */
-                }
-                
-                /* Grid específico para as pastas dentro de um curso */
-                .category-grid {
-                    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-                    gap: 15px;
-                }
-                .category-grid .learning-card {
-                    padding: 20px;
-                    min-height: 100px;
-                    border-radius: 12px;
-                }
-                .category-grid .card-icon-box {
-                    width: 30px;
-                    height: 30px;
-                    font-size: 20px;
-                    margin-bottom: 10px;
-                }
-                .category-grid .card-title {
-                    font-size: 13px;
-                }
-
-                .category-grid .card-desc {
-                    display: none; 
-                }
-
-                @media (max-width: 600px) {
-                    .learning-grid {
-                        grid-template-columns: 1fr;
-                        gap: 12px;
-                    }
-                    .learning-card {
-                        padding: 15px;
-                    }
-                }
-            </style>
+            <h2 class="text-gradient" style="font-size: 36px; margin-bottom: 40px; text-align: center;">Seu aprendizado, seu ritmo.</h2>
             
             <div class="learning-grid home-learning-grid" id="home-learning-grid">
                 {% for curso_data in cursos %}
@@ -169,74 +46,72 @@
                 {% set cats = curso_data.categorias %}
                 <div class="learning-card folder-card" 
                      data-path="{{ curso_data.path }}"
-                     onclick="handleCardClick(event, '{{ loop.index }}', '{{ curso | replace('\'', '\\\'') }}')" 
-                     style="padding: 25px; min-height: 180px; align-items: flex-start; cursor: grab;">
+                     onclick="handleCardClick(event, '{{ loop.index }}', '{{ curso | replace('\'', '\\\'') }}')">
                     
-                    <div class="card-icon-box" style="margin-bottom: 20px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; background: var(--hover-bg); border-radius: 14px; font-weight: 900; font-size: 26px; color: var(--accent-color); position: relative; border: 1px solid var(--border-color);">
+                    <div class="card-icon-box">
                         {{ curso[0] | upper }}
-                        <i class="devicon-{{ curso | lower | replace(' ', '') }}-plain colored" style="position: absolute; font-size: 40px; background: var(--card-bg); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 14px; opacity: 1;"></i>
+                        <i class="devicon-{{ curso | lower | replace(' ', '') }}-plain colored" style="position: absolute; font-size: 32px;"></i>
                     </div>
                     
-                    <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                        <h3 class="card-title" style="text-align: left; margin: 0; flex: 1;">{{ curso }}</h3>
-                        <button onclick="startRename(event, this)" style="background: none; border: none; cursor: pointer; opacity: 0.3; font-size: 12px; padding: 5px;">✏️</button>
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <h3 class="card-title">{{ curso }}</h3>
+                        <button onclick="startRename(event, this)" class="btn btn-secondary" style="padding: 4px 8px; font-size: 10px; opacity: 0.5;">✏️</button>
                     </div>
                     
-                    <div class="rename-box" style="display: none; width: 100%; margin-top: 5px; gap: 5px;">
-                        <input type="text" class="rename-input" value="{{ curso }}" style="flex: 1; background: var(--input-bg); border: 1px solid var(--accent-color); color: var(--text-color); border-radius: 4px; padding: 2px 8px; font-size: 13px;">
-                        <button onclick="finishRename(event, this)" style="background: var(--accent-color); color: white; border: none; border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer;">OK</button>
+                    <div class="rename-box" style="display: none; width: 100%; gap: 8px;">
+                        <input type="text" class="rename-input" value="{{ curso }}" style="flex: 1; padding: 8px; font-size: 12px; border-radius: 8px;">
+                        <button onclick="finishRename(event, this)" class="btn btn-primary" style="padding: 8px 12px;">OK</button>
                     </div>
 
-                    <p class="card-desc" style="text-align: left; margin-top: 10px;">Domine completamente o curso {{ curso }} com acesso a todos os módulos e projetos práticos.</p>
+                    <p class="card-desc">Continue de onde parou no curso de {{ curso }}.</p>
                     
                     <div class="lesson-badge">
-                        <div class="badge-item" title="Módulos">
-                            <span>📁</span> {{ cats|length }} MÓDULOS
+                        <div class="badge-item">
+                            <span>📁</span> {{ cats|length }} Módulos
                         </div>
-                        <div class="badge-item" title="Total de Aulas">
+                        <div class="badge-item">
                             {% set total_aulas = namespace(count=0) %}
                             {% for cat, videos in cats.items() %}
                                 {% set total_aulas.count = total_aulas.count + videos|length %}
                             {% endfor %}
-                            <span>🎬</span> {{ total_aulas.count }} VÍDEOS
+                            <span>🎬</span> {{ total_aulas.count }} Vídeos
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% if not cursos %}
-            <div style="text-align: center; padding: 50px; color: #888;">
-                <h2>Nenhum conteúdo encontrado.</h2>
-                <p>Adicione uma pasta nas configurações para começar a organizar seus vídeos!</p>
+            <div class="glass" style="text-align: center; padding: 60px; border-radius: 24px; margin-top: 40px;">
+                <h2 style="font-size: 24px;">Sua biblioteca está vazia.</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Comece adicionando seus diretórios de cursos nas configurações.</p>
+                <a href="/config" class="btn btn-primary">ADICIONAR CURSOS</a>
             </div>
             {% endif %}
         </section>
 
-        <!-- Seções dos Cursos Ocultas por Padrão -->
         {% for curso_data in cursos %}
         {% set curso = curso_data.name %}
         {% set cats = curso_data.categorias %}
         {% set curso_index = loop.index %}
         <div class="curso-container" id="curso-{{ curso_index }}" data-nome="{{ curso | e }}" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px;">
-                <h2 style="font-size: 28px; text-transform: uppercase;">🎬 {{ curso }}</h2>
-                <button onclick="showHome()" style="background: var(--hover-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">INÍCIO</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+                <h2 style="font-size: 32px; font-family: 'Outfit', sans-serif;">{{ curso }}</h2>
+                <button onclick="showHome()" class="btn btn-secondary">VOLTAR AO INÍCIO</button>
             </div>
             
             <!-- Grid de Pastas/Módulos -->
             <div class="learning-grid category-grid" id="grid-curso-{{ curso_index }}">
                 {% for categoria, videos in cats.items() %}
                 {% set cat_index = loop.index %}
-                <div class="learning-card folder-card" onclick="showCategory('{{ curso_index }}', '{{ cat_index }}')" style="position: relative; min-height: 140px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 25px;">
-                    <!-- Espaço para o Ícone da Linguagem -->
-                    <div class="lang-icon" style="font-size: 30px; margin-bottom: 15px; color: var(--accent-color);">
+                <div class="learning-card folder-card" onclick="showCategory('{{ curso_index }}', '{{ cat_index }}')" style="min-height: 160px; justify-content: center;">
+                    <div class="lang-icon" style="font-size: 40px; color: var(--accent-color); margin-bottom: 10px;">
                         <i class="devicon-{{ categoria | lower | replace(' ', '') }}-plain colored"></i>
                     </div>
                     
-                    <h3 class="card-title" style="text-align: left; margin: 0; width: 100%; white-space: normal; font-size: 16px; letter-spacing: 0;">{{ categoria }}</h3>
+                    <h3 class="card-title" style="font-size: 16px;">{{ categoria }}</h3>
                     
-                    <div class="video-count-badge" style="position: absolute; bottom: 15px; right: 15px; font-size: 11px; display: flex; align-items: center; gap: 5px; font-weight: 800; background: var(--hover-bg); padding: 6px 12px; border-radius: 12px; border: 1px solid var(--border-color); color: var(--text-color);">
-                        <span>📽️</span> {{ videos|length }} VÍDEOS
+                    <div class="badge-item" style="position: absolute; bottom: 20px; right: 20px;">
+                        <span>📽️</span> {{ videos|length }} Vídeos
                     </div>
                 </div>
                 {% endfor %}
@@ -245,16 +120,18 @@
             <!-- Vídeos por Categoria (Oculto por padrão) -->
             {% for categoria, videos in cats.items() %}
             {% set cat_index = loop.index %}
-            <section class="category-section" id="section-cat-{{ curso_index }}-{{ cat_index }}" style="display: none; margin-bottom: 30px;">
-                <div style="margin-bottom: 20px;">
-                    <button onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}')" style="background: transparent; color: var(--accent-color); border: none; cursor: pointer; font-weight: bold; font-size: 16px;">← Voltar para Módulos</button>
+            <section class="category-section" id="section-cat-{{ curso_index }}-{{ cat_index }}" style="display: none; animation: fadeIn 0.4s ease;">
+                <div style="margin-bottom: 30px;">
+                    <button onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}')" class="btn btn-secondary" style="background: transparent; border: none; padding: 0; color: var(--accent-color);">
+                        ← Voltar para Módulos
+                    </button>
                 </div>
-                <h3 style="color: var(--accent-color); margin-bottom: 20px; font-size: 22px;">{{ categoria }}</h3>
+                <h3 style="color: var(--accent-color); margin-bottom: 30px; font-size: 24px; font-family: 'Outfit', sans-serif;">{{ categoria }}</h3>
                 <div class="learning-grid">
                     {% for video in videos %}
-                    <a class="learning-card" href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" style="padding: 20px; border-radius: 12px; border-color: var(--border-color);">
-                        <div style="font-size: 24px; margin-bottom: 10px; color: var(--accent-color);">▶</div>
-                        <div class="card-title" style="font-size: 15px; margin: 0; text-transform: none;">{{ video.nome }}</div>
+                    <a class="learning-card" href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" style="padding: 20px; flex-direction: row; align-items: center; gap: 20px;">
+                        <div class="card-icon-box" style="width: 44px; height: 44px; font-size: 16px; flex-shrink: 0;">▶</div>
+                        <div class="card-title" style="font-size: 14px; font-weight: 500;">{{ video.nome }}</div>
                     </a>
                     {% endfor %}
                 </div>
@@ -269,38 +146,40 @@
 
     <!-- Menu Lateral Dinâmico -->
     <aside class="sidebar" id="sidebar">
-        <h3 id="sidebar-title" style="cursor: pointer; font-size: 18px; margin-bottom: 25px; white-space: nowrap; overflow: hidden; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;" onclick="showHome()">🎬 Menu</h3>
-        
-        
-        <div id="sidebar-empty" style="padding: 15px; color: #888; font-size: 14px;">
-            Selecione um curso para começar a aprender.
+        <div class="sidebar-header">
+            <h3 id="sidebar-title" style="cursor: pointer;" onclick="showHome()">🎬 Menu</h3>
         </div>
-
+        
+        <div id="sidebar-empty" style="padding: 30px; color: var(--text-muted); font-size: 13px;">
+            Selecione um curso para explorar o conteúdo.
+        </div>
 
         {% for curso_data in cursos %}
         {% set curso = curso_data.name %}
         {% set cats = curso_data.categorias %}
         {% set curso_index = loop.index %}
-        <ul class="explorer-menu curso-menu" id="menu-curso-{{ curso_index }}" data-nome="{{ curso | e }}" style="display: none;">
-            {% for categoria, videos in cats.items() %}
-            {% set cat_index = loop.index %}
-            <li>
-                <div class="explorer-cat" onclick="toggleSidebarCat('{{ curso_index }}', '{{ cat_index }}', this)" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <span class="cat-arrow" style="font-size: 10px; transition: transform 0.2s; display: inline-block;">▶</span>
-                    <span>{{ categoria }}</span>
-                </div>
-                <ul class="explorer-videos" id="menu-cat-{{ curso_index }}-{{ cat_index }}" style="display: none;">
-                    {% for video in videos %}
-                    <li>
-                        <a href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" title="{{ video.nome }}">
-                            🎬 {{ video.nome }}
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </li>
-            {% endfor %}
-        </ul>
+        <div class="curso-menu" id="menu-curso-{{ curso_index }}" style="display: none;">
+            <ul class="explorer-menu">
+                {% for categoria, videos in cats.items() %}
+                {% set cat_index = loop.index %}
+                <li>
+                    <div class="explorer-cat" onclick="toggleSidebarCat('{{ curso_index }}', '{{ cat_index }}', this)">
+                        <span class="cat-arrow">▶</span>
+                        <span>{{ categoria }}</span>
+                    </div>
+                    <ul class="explorer-videos" id="menu-cat-{{ curso_index }}-{{ cat_index }}">
+                        {% for video in videos %}
+                        <li>
+                            <a href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" title="{{ video.nome }}">
+                                🎬 {{ video.nome }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
         {% endfor %}
     </aside>
 </div>
