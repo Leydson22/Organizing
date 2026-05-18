@@ -47,13 +47,14 @@
     }
     .playlist-item {
         display: flex;
-        padding: 15px 25px;
+        padding: 12px 25px;
         text-decoration: none;
         color: var(--text-color);
         border-bottom: 1px solid var(--border-color);
         transition: var(--transition);
         align-items: center;
-        gap: 15px;
+        gap: 12px;
+        font-size: 13px;
     }
     .playlist-item:hover {
         background: var(--hover-bg);
@@ -61,17 +62,31 @@
     .playlist-item.active {
         background: rgba(0, 99, 229, 0.1);
         border-left: 4px solid var(--accent-color);
-        padding-left: 21px;
+        padding-left: 21px !important;
+    }
+    .playlist-item.subcat-item {
+        padding-left: 45px;
+    }
+    .playlist-item.subcat-item.active {
+        padding-left: 41px !important;
     }
     .playlist-item.active .item-title {
         color: var(--accent-color);
         font-weight: 700;
     }
-    .item-number {
-        font-size: 12px;
-        color: var(--text-muted);
-        font-weight: 800;
-        width: 20px;
+    .subcat-header {
+        padding: 10px 25px;
+        color: var(--accent-color);
+        font-size: 11px;
+        font-weight: 700;
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid var(--border-color);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .item-title {
         font-size: 13px;
@@ -115,18 +130,26 @@
         </div>
 
         <aside class="playlist-section">
-            <div class="playlist-header">
-                <h3>CONTEÚDO DO MÓDULO</h3>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px; font-weight: 700;">{{ categoria | upper }}</p>
+            <div class="playlist-header" style="padding: 30px 25px;">
+                <span style="font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; font-family: 'Outfit', sans-serif; display: block; opacity: 0.7;">CONTEÚDO DO MÓDULO</span>
+                <h3 style="font-size: 20px; color: var(--text-color); font-weight: 800; margin-top: 8px; font-family: 'Outfit', sans-serif; line-height: 1.3;">{{ categoria }}</h3>
+                <div style="width: 50px; height: 3px; background: var(--accent-color); border-radius: 2px; margin-top: 15px; box-shadow: 0 0 10px var(--accent-glow);"></div>
             </div>
             
             <div class="playlist-items">
-                {% for item in playlist %}
-                <a href="/player/{{ item.video.filepath | urlencode }}?categoria={{ item.cat | urlencode }}" 
-                   class="playlist-item {% if item.video.filepath == filepath %}active{% endif %}">
-                    <span class="item-number">{{ "%02d" | format(loop.index) }}</span>
-                    <div class="item-title">{{ item.video.nome }}</div>
+                {% for group in playlist %}
+                {% if group.subcategoria %}
+                <div class="subcat-header">
+                    <span>📁</span> {{ group.subcategoria }}
+                </div>
+                {% endif %}
+                {% for video in group.videos %}
+                <a href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" 
+                   class="playlist-item {% if video.filepath == filepath %}active{% endif %} {% if group.subcategoria %}subcat-item{% endif %}">
+                    <span>🎬</span>
+                    <div class="item-title">{{ video.nome }}</div>
                 </a>
+                {% endfor %}
                 {% endfor %}
             </div>
         </aside>

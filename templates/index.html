@@ -96,7 +96,6 @@
         <div class="curso-container" id="curso-{{ curso_index }}" data-nome="{{ curso | e }}" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
                 <h2 style="font-size: 32px; font-family: 'Outfit', sans-serif;">{{ curso }}</h2>
-                <button onclick="showHome()" class="btn btn-secondary">VOLTAR AO INÍCIO</button>
             </div>
             
             <!-- Grid de Pastas/Módulos -->
@@ -121,20 +120,78 @@
             {% for categoria, videos in cats.items() %}
             {% set cat_index = loop.index %}
             <section class="category-section" id="section-cat-{{ curso_index }}-{{ cat_index }}" style="display: none; animation: fadeIn 0.4s ease;">
-                <div style="margin-bottom: 30px;">
-                    <button onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}')" class="btn btn-secondary" style="background: transparent; border: none; padding: 0; color: var(--accent-color);">
+                <div class="nav-breadcrumb">
+                    <button onclick="showCurso('{{ curso_index }}', '{{ curso | replace('\'', '\\\'') }}')" class="nav-back-btn">
                         ← Voltar para Módulos
+                    </button>
+                    <span class="nav-breadcrumb-separator" id="sep-cat-{{ curso_index }}-{{ cat_index }}" style="display: none;">›</span>
+                    <button id="btn-back-cat-{{ curso_index }}-{{ cat_index }}" onclick="hideSubcat('{{ curso_index }}', '{{ cat_index }}')" class="nav-back-btn" style="display: none;">
+                        ← Voltar para {{ categoria }}
                     </button>
                 </div>
                 <h3 style="color: var(--accent-color); margin-bottom: 30px; font-size: 24px; font-family: 'Outfit', sans-serif;">{{ categoria }}</h3>
-                <div class="learning-grid">
-                    {% for video in videos %}
-                    <a class="learning-card" href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" style="padding: 20px; flex-direction: row; align-items: center; gap: 20px;">
-                        <div class="card-icon-box" style="width: 44px; height: 44px; font-size: 16px; flex-shrink: 0;">▶</div>
-                        <div class="card-title" style="font-size: 14px; font-weight: 500;">{{ video.nome }}</div>
-                    </a>
+                
+                <!-- Subfolder cards + direct videos -->
+                <div id="cat-content-{{ curso_index }}-{{ cat_index }}">
+                    {% set has_subfolders = namespace(val=false) %}
+                    {% for sub, _ in videos|groupby('subcategoria') %}
+                        {% if sub %}{% set has_subfolders.val = true %}{% endif %}
+                    {% endfor %}
+                    
+                    {% if has_subfolders.val %}
+                    <div class="learning-grid category-grid">
+                        {% set sub_idx = namespace(val=0) %}
+                        {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
+                        {% if subcategoria %}
+                        {% set sub_idx.val = sub_idx.val + 1 %}
+                        <div class="learning-card folder-card" onclick="showSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx.val }}')" style="min-height: 160px; justify-content: center;">
+                            <div style="font-size: 40px; color: var(--accent-color); margin-bottom: 10px;">📁</div>
+                            <h3 class="card-title" style="font-size: 16px;">{{ subcategoria }}</h3>
+                            <div class="badge-item" style="position: absolute; bottom: 20px; right: 20px;">
+                                <span>📽️</span> {{ subvideos|length }} Vídeos
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Direct videos (no subcategory) -->
+                    {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
+                    {% if not subcategoria %}
+                    {% if has_subfolders.val %}
+                    <h4 style="color: var(--text-muted); margin: 25px 0 15px; font-size: 14px;">Vídeos nesta pasta:</h4>
+                    {% endif %}
+                    <div class="learning-grid">
+                        {% for video in subvideos %}
+                        <a class="learning-card" href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" style="padding: 20px; flex-direction: row; align-items: center; gap: 20px;">
+                            <div class="card-icon-box" style="width: 44px; height: 44px; font-size: 16px; flex-shrink: 0;">▶</div>
+                            <div class="card-title" style="font-size: 14px; font-weight: 500;">{{ video.nome }}</div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
+                
+                <!-- Subcategory video sections (hidden by default) -->
+                {% set sub_idx2 = namespace(val=0) %}
+                {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
+                {% if subcategoria %}
+                {% set sub_idx2.val = sub_idx2.val + 1 %}
+                <div class="subcat-section" id="subcat-{{ curso_index }}-{{ cat_index }}-{{ sub_idx2.val }}" style="display: none; animation: fadeIn 0.4s ease;">
+                    <h4 style="color: var(--accent-color); margin-bottom: 20px; font-size: 20px; font-family: 'Outfit', sans-serif;">📁 {{ subcategoria }}</h4>
+                    <div class="learning-grid">
+                        {% for video in subvideos %}
+                        <a class="learning-card" href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" style="padding: 20px; flex-direction: row; align-items: center; gap: 20px;">
+                            <div class="card-icon-box" style="width: 44px; height: 44px; font-size: 16px; flex-shrink: 0;">▶</div>
+                            <div class="card-title" style="font-size: 14px; font-weight: 500;">{{ video.nome }}</div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
             </section>
             {% endfor %}
         </div>
@@ -168,12 +225,17 @@
                         <span>{{ categoria }}</span>
                     </div>
                     <ul class="explorer-videos" id="menu-cat-{{ curso_index }}-{{ cat_index }}">
-                        {% for video in videos %}
-                        <li>
+                        {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
+                        {% if subcategoria %}
+                        <li style="padding: 6px 12px; color: var(--accent-color); font-size: 11px; font-weight: 600; opacity: 0.7;">📁 {{ subcategoria }}</li>
+                        {% endif %}
+                        {% for video in subvideos %}
+                        <li{% if subcategoria %} style="padding-left: 24px;"{% endif %}>
                             <a href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" title="{{ video.nome }}">
                                 🎬 {{ video.nome }}
                             </a>
                         </li>
+                        {% endfor %}
                         {% endfor %}
                     </ul>
                 </li>
@@ -378,7 +440,18 @@ function showCategory(cursoIndex, catIndex) {
         .forEach(sec => sec.style.display = 'none');
     
     const section = document.getElementById('section-cat-' + cursoIndex + '-' + catIndex);
-    if (section) section.style.display = 'block';
+    if (section) {
+        section.style.display = 'block';
+        // Reset: show cat-content and hide any open subcats
+        section.querySelectorAll('.subcat-section').forEach(s => s.style.display = 'none');
+        const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
+        if (catContent) catContent.style.display = 'block';
+        // Reset breadcrumb
+        const backBtn = document.getElementById('btn-back-cat-' + cursoIndex + '-' + catIndex);
+        const sep = document.getElementById('sep-cat-' + cursoIndex + '-' + catIndex);
+        if (backBtn) backBtn.style.display = 'none';
+        if (sep) sep.style.display = 'none';
+    }
     
     // === RIGHT SIDE: highlight and scroll to the active category ===
     // Remove active class from all categories in this course menu
@@ -408,6 +481,49 @@ function showCategory(cursoIndex, catIndex) {
     window.scrollTo(0, 0);
 }
 
+function showSubcat(cursoIndex, catIndex, subcatIndex) {
+    // Hide the category content (subfolder cards + direct videos)
+    const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
+    if (catContent) catContent.style.display = 'none';
+    
+    // Hide all subcat sections in this category
+    const section = document.getElementById('section-cat-' + cursoIndex + '-' + catIndex);
+    if (section) {
+        section.querySelectorAll('.subcat-section').forEach(s => s.style.display = 'none');
+    }
+    
+    // Show the target subcat section
+    const subcatEl = document.getElementById('subcat-' + cursoIndex + '-' + catIndex + '-' + subcatIndex);
+    if (subcatEl) subcatEl.style.display = 'block';
+    
+    // Show the breadcrumb back button
+    const backBtn = document.getElementById('btn-back-cat-' + cursoIndex + '-' + catIndex);
+    const sep = document.getElementById('sep-cat-' + cursoIndex + '-' + catIndex);
+    if (backBtn) backBtn.style.display = 'inline-flex';
+    if (sep) sep.style.display = 'inline';
+    
+    window.scrollTo(0, 0);
+}
+
+function hideSubcat(cursoIndex, catIndex) {
+    // Hide all subcat sections in this category
+    const section = document.getElementById('section-cat-' + cursoIndex + '-' + catIndex);
+    if (section) {
+        section.querySelectorAll('.subcat-section').forEach(s => s.style.display = 'none');
+    }
+    
+    // Show the category content again
+    const catContent = document.getElementById('cat-content-' + cursoIndex + '-' + catIndex);
+    if (catContent) catContent.style.display = 'block';
+    
+    // Hide the breadcrumb back button
+    const backBtn = document.getElementById('btn-back-cat-' + cursoIndex + '-' + catIndex);
+    const sep = document.getElementById('sep-cat-' + cursoIndex + '-' + catIndex);
+    if (backBtn) backBtn.style.display = 'none';
+    if (sep) sep.style.display = 'none';
+    
+    window.scrollTo(0, 0);
+}
 
 
 function toggleMenu(id, iconElement) {

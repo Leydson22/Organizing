@@ -68,9 +68,15 @@ def scan_videos():
                     
                     if len(parts) > 1:
                         categoria = parts[0]
-                        nome_exibicao = " - ".join([os.path.splitext(p)[0] for p in parts[1:]])
+                        if len(parts) > 2:
+                            # Video is inside a subfolder within the category
+                            subcategoria = "/".join(parts[1:-1])
+                        else:
+                            subcategoria = ""
+                        nome_exibicao = os.path.splitext(parts[-1])[0]
                     else:
                         categoria = "Raiz"
+                        subcategoria = ""
                         nome_exibicao = os.path.splitext(arquivo)[0]
                         
                     if categoria not in cursos[nome_curso]:
@@ -79,7 +85,8 @@ def scan_videos():
                     cursos[nome_curso][categoria].append({
                         'nome': nome_exibicao,
                         'filepath': rel_path,
-                        'pasta_base': path
+                        'pasta_base': path,
+                        'subcategoria': subcategoria
                     })
                     
     cursos_final = []
@@ -224,7 +231,14 @@ def player(filepath):
                         all_videos.append({'cat': cat, 'video': v})
                 
                 if categoria in categorias_dict:
-                    playlist = [{'cat': categoria, 'video': v} for v in categorias_dict[categoria]]
+                    from collections import OrderedDict
+                    grouped = OrderedDict()
+                    for v in categorias_dict[categoria]:
+                        sub = v.get('subcategoria', '')
+                        if sub not in grouped:
+                            grouped[sub] = []
+                        grouped[sub].append(v)
+                    playlist = [{'subcategoria': sub, 'videos': videos} for sub, videos in grouped.items()]
                 else:
                     playlist = []
                 
