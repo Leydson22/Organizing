@@ -253,7 +253,7 @@ def player(filepath):
                         break
                 break
 
-        return render_template('player.html', filepath=filepath, nome=nome, categoria=categoria, prev_url=prev_url, next_url=next_url, playlist=playlist, nome_curso=nome_curso_atual)
+        return render_template('player.html', filepath=filepath, nome=nome, categoria=categoria, prev_url=prev_url, next_url=next_url, playlist=playlist, nome_curso=nome_curso_atual, cursos=cursos)
     except Exception as e:
         import traceback
         with open('error_player.log', 'w', encoding='utf-8') as f:
@@ -301,15 +301,180 @@ if __name__ == '__main__':
         print(folder)
         sys.exit(0)
 
+    import socket
+    import psutil
+
+    PORT = 5000
+
+    def is_port_in_use(port):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(('127.0.0.1', port)) == 0
+
+    def find_available_port(start_port=5000):
+        port = start_port
+        while True:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                if s.connect_ex(('127.0.0.1', port)) != 0:
+                    return port
+            port += 1
+
+    def kill_other_instances():
+        current_pid = os.getpid()
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                pid = proc.info['pid']
+                if pid == current_pid:
+                    continue
+                name = (proc.info['name'] or '').lower()
+                cmdline = proc.info['cmdline'] or []
+                
+                is_match = False
+                if getattr(sys, 'frozen', False):
+                    if name in ('scanvid.exe', 'app.exe'):
+                        is_match = True
+                else:
+                    if 'python' in name and any('app.py' in arg for arg in cmdline):
+                        is_match = True
+                
+                if is_match:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=1)
+                    except psutil.TimeoutExpired:
+                        proc.kill()
+            except:
+                pass
+
+    def show_instance_dialog():
+        import tkinter as tk
+        choice = [None]
+        
+        root = tk.Tk()
+        root.title("Instância do ScanVid Ativa")
+        root.resizable(False, False)
+        
+        # Modern Dark Styling
+        bg_color = "#1e1e2e"
+        fg_color = "#cdd6f4"
+        accent_color = "#89b4fa"      # Blue
+        green_color = "#a6e3a1"       # Green
+        danger_color = "#f38ba8"      # Pinkish red
+        button_bg = "#313244"
+        button_fg = "#cdd6f4"
+        
+        # Center window
+        window_width = 460
+        window_height = 200
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        position_top = int(screen_height/2 - window_height/2)
+        position_right = int(screen_width/2 - window_width/2)
+        root.geometry(f"{window_width}x{window_height}+{position_right}+{position_top}")
+        root.configure(bg=bg_color)
+        root.attributes('-topmost', True)
+        
+        label_title = tk.Label(
+            root,
+            text="ScanVid já está aberto!",
+            font=("Helvetica", 14, "bold"),
+            bg=bg_color,
+            fg=accent_color,
+            pady=12
+        )
+        label_title.pack()
+        
+        label_desc = tk.Label(
+            root,
+            text="Uma instância do servidor já está em execução.\nO que você deseja fazer?",
+            font=("Helvetica", 10),
+            bg=bg_color,
+            fg=fg_color,
+            justify="center",
+            pady=5
+        )
+        label_desc.pack()
+        
+        btn_frame = tk.Frame(root, bg=bg_color)
+        btn_frame.pack(pady=20)
+        
+        def on_atualizar():
+            choice[0] = "atualizar"
+            root.destroy()
+            
+        def on_abrir_outra():
+            choice[0] = "abrir_outra"
+            root.destroy()
+            
+        def on_cancelar():
+            choice[0] = "cancelar"
+            root.destroy()
+            
+        btn_style = {
+            "font": ("Helvetica", 9, "bold"),
+            "bd": 0,
+            "padx": 10,
+            "pady": 8,
+            "cursor": "hand2"
+        }
+        
+        btn_update = tk.Button(
+            btn_frame,
+            text="Atualizar (Reiniciar)",
+            command=on_atualizar,
+            bg=accent_color,
+            fg=bg_color,
+            activebackground=button_bg,
+            activeforeground=accent_color,
+            **btn_style
+        )
+        btn_update.grid(row=0, column=0, padx=6)
+        
+        btn_open = tk.Button(
+            btn_frame,
+            text="Manter as Duas",
+            command=on_abrir_outra,
+            bg=green_color,
+            fg=bg_color,
+            activebackground=button_bg,
+            activeforeground=green_color,
+            **btn_style
+        )
+        btn_open.grid(row=0, column=1, padx=6)
+        
+        btn_cancel = tk.Button(
+            btn_frame,
+            text="Cancelar",
+            command=on_cancelar,
+            bg=danger_color,
+            fg=bg_color,
+            activebackground=button_bg,
+            activeforeground=danger_color,
+            **btn_style
+        )
+        btn_cancel.grid(row=0, column=2, padx=6)
+        
+        root.protocol("WM_DELETE_WINDOW", on_cancelar)
+        root.mainloop()
+        return choice[0]
+
+    # Check if instance already running
+    if is_port_in_use(5000):
+        ans = show_instance_dialog()
+        if ans == "atualizar":
+            kill_other_instances()
+            time.sleep(1.5)  # Wait for port to be released
+            PORT = 5000
+        elif ans == "abrir_outra":
+            PORT = find_available_port(5001)
+        else:
+            sys.exit(0)
+
     def start_server():
-        app.run(host='0.0.0.0', port=5000, debug=False)
+        app.run(host='0.0.0.0', port=PORT, debug=False)
 
     t = threading.Thread(target=start_server)
     t.daemon = True
     t.start()
-
-    time.sleep(1)
-    webbrowser.open('http://localhost:5000')
 
     # Create a small modern Tkinter control window
     try:
@@ -350,7 +515,7 @@ if __name__ == '__main__':
         
         sublabel = tk.Label(
             root, 
-            text="http://localhost:5000", 
+            text=f"http://localhost:{PORT}", 
             font=("Consolas", 10), 
             bg=bg_color, 
             fg=fg_color,
@@ -362,7 +527,7 @@ if __name__ == '__main__':
         frame.pack(pady=12)
         
         def open_browser():
-            webbrowser.open('http://localhost:5000')
+            webbrowser.open(f'http://localhost:{PORT}')
             
         def close_app():
             root.destroy()
@@ -400,12 +565,9 @@ if __name__ == '__main__':
         )
         btn_close.grid(row=0, column=1, padx=8)
         
-        # Handle close button of the window
         root.protocol("WM_DELETE_WINDOW", close_app)
-        
         root.mainloop()
     except Exception as e:
-        # Fallback if Tkinter is not available (e.g. headless Linux without X server)
         try:
             while True:
                 time.sleep(1)

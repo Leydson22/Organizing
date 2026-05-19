@@ -11,21 +11,50 @@
 </head>
 <body>
 
-<header class="header">
+<header class="header" style="position: relative;">
     <div class="logo" onclick="showHome()" style="cursor: pointer;">
         SCAN<span>VID</span>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <button onclick="showHome()" class="btn btn-secondary" title="Início">
-            <span>🏠</span> INÍCIO
-        </button>
-
+    <div class="header-right-buttons" style="position: absolute; right: 0; top: 0; bottom: 0; width: 350px; min-width: 350px; display: flex; align-items: center; justify-content: space-between; padding-left: 25px; padding-right: 25px; z-index: 1000;">
+        <div class="nav-buttons" style="display: flex; gap: 10px; align-items: center; position: relative; z-index: 10000;">
+            <button onclick="toggleGlobalNavMenu(event)" class="btn btn-secondary btn-menu-pulse" style="font-size: 13px; font-weight: 800; gap: 8px; border-radius: 12px; height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px;" title="Menu de Navegação">
+                <span class="menu-icon">☰</span> MENU
+            </button>
+        </div>
         <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px; height: 42px;">🌗</button>
         
         <a href="/config" class="btn btn-primary" title="Configurações">
             <span>⚙️</span> CONFIGS
         </a>
+    </div>
+
+    <!-- Menu Flutuante de Navegação Global -->
+    <div id="global-nav-menu" class="floating-nav-menu" style="display: none; position: absolute; top: 70px; right: 0 !important; left: auto !important; width: 350px; min-width: 350px; border-radius: 0 0 0 16px; border-top: none; padding: 25px; z-index: 999999;">
+        <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Navegação</h4>
+        <ul>
+            <li>
+                <a href="javascript:void(0)" id="nav-link-inicio" onclick="showHome(); document.getElementById('global-nav-menu').style.display='none';">
+                    <span>🏠</span> INÍCIO
+                </a>
+            </li>
+            <li>
+                <a href="/config">
+                    <span>⚙️</span> CONFIGURAÇÕES
+                </a>
+            </li>
+        </ul>
+        <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-top: 20px; margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Meus Cursos</h4>
+        <ul>
+            {% for curso_data in cursos %}
+            {% set c_name = curso_data.name %}
+            <li>
+                <a href="javascript:void(0)" id="nav-link-curso-{{ loop.index }}" onclick="showCurso('{{ loop.index }}', '{{ c_name | replace('\'', '\\\'') }}'); document.getElementById('global-nav-menu').style.display='none';">
+                    <span>📚</span> {{ c_name | upper }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 </header>
 
@@ -89,11 +118,11 @@
         {% set cats = curso_data.categorias %}
         {% set curso_index = loop.index %}
         <div class="curso-container" id="curso-{{ curso_index }}" data-nome="{{ curso | e }}" style="display: none;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; position: relative;">
-                <button onclick="toggleNavMenu('{{ curso_index }}', event)" class="btn btn-secondary" style="padding: 10px; border-radius: 12px; height: 42px; width: 42px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;" title="Caminho de Navegação">
+            <div class="curso-header-sticky" style="display: flex; align-items: center; gap: 15px; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; position: sticky; top: -40px; background: var(--bg-color); z-index: 50; padding-top: 40px; margin-top: -40px; transition: background-color 0.5s ease;">
+                <button onclick="toggleNavMenu('{{ curso_index }}', event)" class="btn btn-secondary" style="padding: 10px; border-radius: 12px; height: 42px; width: 42px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; flex-shrink: 0;" title="Caminho de Navegação">
                     ☰
                 </button>
-                <h2 style="font-size: 32px; font-family: 'Outfit', sans-serif; font-weight: 800; margin: 0;">{{ curso }}</h2>
+                <h2 id="curso-title-{{ curso_index }}" data-basename="{{ curso | e }}" style="font-size: 32px; font-family: 'Outfit', sans-serif; font-weight: 800; margin: 0; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ curso }}</h2>
                 
                 <!-- Menu Flutuante de Navegação -->
                 <div id="nav-menu-{{ curso_index }}" class="floating-nav-menu" style="display: none;">
@@ -145,7 +174,7 @@
             {% for categoria, videos in cats.items() %}
             {% set cat_index = loop.index %}
             <section class="category-section" id="section-cat-{{ curso_index }}-{{ cat_index }}" style="display: none; animation: fadeIn 0.4s ease;">
-                <h3 style="color: var(--accent-color); margin-bottom: 30px; font-size: 24px; font-family: 'Outfit', sans-serif;">{{ categoria }}</h3>
+                <h3 style="color: var(--accent-color); margin-bottom: 30px; font-size: 24px; font-family: 'Outfit', sans-serif; text-transform: uppercase;">{{ categoria }}</h3>
                 
                 <!-- Subfolder cards + direct videos -->
                 <div id="cat-content-{{ curso_index }}-{{ cat_index }}">
@@ -176,7 +205,7 @@
                     {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
                     {% if not subcategoria %}
                     {% if has_subfolders.val %}
-                    <h4 style="color: var(--text-muted); margin: 25px 0 15px; font-size: 14px;">Vídeos nesta pasta:</h4>
+                    <h4 style="color: var(--text-muted); margin: 25px 0 15px; font-size: 14px; text-transform: uppercase;">Vídeos nesta pasta:</h4>
                     {% endif %}
                     <div class="learning-grid">
                         {% for video in subvideos %}
@@ -196,7 +225,7 @@
                 {% if subcategoria %}
                 {% set sub_idx2.val = sub_idx2.val + 1 %}
                 <div class="subcat-section" id="subcat-{{ curso_index }}-{{ cat_index }}-{{ sub_idx2.val }}" style="display: none; animation: fadeIn 0.4s ease;">
-                    <h4 style="color: var(--accent-color); margin-bottom: 20px; font-size: 20px; font-family: 'Outfit', sans-serif;">📁 {{ subcategoria }}</h4>
+                    <h4 style="color: var(--accent-color); margin-bottom: 20px; font-size: 20px; font-family: 'Outfit', sans-serif; text-transform: uppercase;">📁 {{ subcategoria }}</h4>
                     <div class="learning-grid">
                         {% for video in subvideos %}
                         <a class="learning-card" href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}" style="padding: 20px; flex-direction: row; align-items: center; gap: 20px;">
@@ -351,7 +380,14 @@ const mouseDownHandler = function(e) {
 
 const mouseMoveHandler = function(e) {
     const dx = x - e.clientX; // Invertido porque a sidebar está à direita
-    sidebar.style.width = `${w + dx}px`;
+    const newWidth = w + dx;
+    sidebar.style.width = `${newWidth}px`;
+    
+    // Sincronizar dinamicamente a largura de todas as caixas de menu flutuante
+    document.querySelectorAll('.floating-nav-menu').forEach(menu => {
+        menu.style.width = `${newWidth}px`;
+        menu.style.minWidth = `${newWidth}px`;
+    });
 };
 
 const mouseUpHandler = function() {
@@ -378,8 +414,11 @@ function showHome() {
     
     document.getElementById('sidebar-empty').style.display = 'block';
     
-    // Hide all floating nav menus
+    // Hide all floating nav menus and update active state
     document.querySelectorAll('.floating-nav-menu').forEach(m => m.style.display = 'none');
+    document.querySelectorAll('#global-nav-menu a').forEach(a => a.classList.remove('active'));
+    let navInicio = document.getElementById('nav-link-inicio');
+    if(navInicio) navInicio.classList.add('active');
     
     window.scrollTo(0, 0);
 }
@@ -404,7 +443,12 @@ function showCurso(index, cursoNome, noScroll) {
     
     var menus = document.querySelectorAll('.curso-menu');
     menus.forEach(function(m) { m.style.display = 'none'; });
-    document.getElementById('menu-curso-' + index).style.display = 'block';
+    document.getElementById('menu-curso-' + index).style.display = 'flex';
+    
+    // Update active state in floating menu
+    document.querySelectorAll('#global-nav-menu a').forEach(a => a.classList.remove('active'));
+    let navCurso = document.getElementById('nav-link-curso-' + index);
+    if(navCurso) navCurso.classList.add('active');
     
     document.getElementById('sidebar-empty').style.display = 'none';
     
@@ -428,6 +472,12 @@ function showCurso(index, cursoNome, noScroll) {
     if (modulesItem) modulesItem.style.display = 'none';
     if (catItem) catItem.style.display = 'none';
     if (subcatItem) subcatItem.style.display = 'none';
+    
+    // Reset the sticky header title back to the base course name
+    const titleEl = document.getElementById('curso-title-' + index);
+    if (titleEl) {
+        titleEl.innerText = titleEl.getAttribute('data-basename');
+    }
     
     if (!noScroll) window.scrollTo(0, 0);
 }
@@ -485,7 +535,17 @@ function showCategory(cursoIndex, catIndex) {
         catItem.style.display = 'none'; // Current level, hide it!
         let catName = "CATEGORIA";
         const h3 = section ? section.querySelector('h3') : null;
-        if (h3) catName = h3.innerText;
+        if (h3) {
+            catName = h3.innerText;
+            h3.style.display = 'none';
+        }
+        
+        // Update header title
+        const titleEl = document.getElementById('curso-title-' + cursoIndex);
+        if (titleEl) {
+            const baseName = titleEl.getAttribute('data-basename');
+            titleEl.innerText = baseName + ' - ' + catName;
+        }
         
         const link = document.getElementById('nav-menu-cat-link-' + cursoIndex);
         const nameSpan = catItem.querySelector('.cat-name-placeholder');
@@ -518,13 +578,14 @@ function showCategory(cursoIndex, catIndex) {
                 if (arrow) arrow.style.transform = 'rotate(90deg)';
                 // Scroll the sidebar to bring the active item into view
                 setTimeout(() => {
-                    catDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    catDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 80);
             }
         }
     }
     
-    window.scrollTo(0, 0);
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) mainContent.scrollTop = 0;
 }
 
 function showSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName) {
@@ -566,6 +627,17 @@ function showSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName) {
         if (nameSpan) nameSpan.innerText = subcatName.toUpperCase();
     }
     
+    // Hide h4 in subcat and update header
+    if (subcatEl) {
+        const h4 = subcatEl.querySelector('h4');
+        if (h4) h4.style.display = 'none';
+    }
+    const titleEl = document.getElementById('curso-title-' + cursoIndex);
+    if (titleEl) {
+        const baseName = titleEl.getAttribute('data-basename');
+        titleEl.innerText = baseName + ' - ' + catName + ' - ' + subcatName;
+    }
+    
     window.scrollTo(0, 0);
 }
 
@@ -583,6 +655,17 @@ function hideSubcat(cursoIndex, catIndex) {
     // Hide subcat item from floating menu
     const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
     if (subcatItem) subcatItem.style.display = 'none';
+    
+    // Reset header to category name
+    const titleEl = document.getElementById('curso-title-' + cursoIndex);
+    const catItem = document.getElementById('nav-menu-cat-item-' + cursoIndex);
+    if (titleEl && catItem) {
+        const baseName = titleEl.getAttribute('data-basename');
+        const nameSpan = catItem.querySelector('.cat-name-placeholder');
+        if (nameSpan) {
+            titleEl.innerText = baseName + ' - ' + nameSpan.innerText;
+        }
+    }
     
     window.scrollTo(0, 0);
 }
@@ -603,6 +686,7 @@ function toggleMenu(id, iconElement) {
 window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const openCurso = urlParams.get('openCurso');
+    const openCatName = urlParams.get('openCatName');
     if (openCurso) {
         const containers = document.querySelectorAll('.curso-container');
         containers.forEach(container => {
@@ -610,6 +694,21 @@ window.addEventListener('DOMContentLoaded', () => {
                 const idParts = container.id.split('-');
                 const index = idParts[idParts.length - 1];
                 showCurso(index, openCurso, true);
+                
+                if (openCatName) {
+                    const sections = container.querySelectorAll('.category-section');
+                    let catIdx = null;
+                    sections.forEach((sec) => {
+                        const h3 = sec.querySelector('h3');
+                        if (h3 && h3.innerText.trim().toLowerCase() === openCatName.trim().toLowerCase()) {
+                            const secIdParts = sec.id.split('-');
+                            catIdx = secIdParts[secIdParts.length - 1];
+                        }
+                    });
+                    if (catIdx) {
+                        showCategory(index, catIdx);
+                    }
+                }
                 
                 // Limpar o parâmetro da URL para não reabrir ao atualizar
                 const newUrl = window.location.pathname;
@@ -676,6 +775,21 @@ function saveAllMetadata() {
     });
 }
 
+function toggleGlobalNavMenu(event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById('global-nav-menu');
+    if (menu) {
+        const isHidden = menu.style.display === 'none';
+        // Close all other menus first
+        document.querySelectorAll('.floating-nav-menu').forEach(m => m.style.display = 'none');
+        if (isHidden) {
+            menu.style.display = 'block';
+        } else {
+            menu.style.display = 'none';
+        }
+    }
+}
+
 function toggleNavMenu(cursoIndex, event) {
     if (event) event.stopPropagation();
     const menu = document.getElementById('nav-menu-' + cursoIndex);
@@ -698,7 +812,7 @@ function closeNavMenu(cursoIndex) {
 
 // Close dropdown when clicking outside
 document.addEventListener('click', function(event) {
-    if (!event.target.closest('.floating-nav-menu') && !event.target.closest('button[onclick*="toggleNavMenu"]')) {
+    if (!event.target.closest('.floating-nav-menu') && !event.target.closest('button[onclick*="toggleNavMenu"]') && !event.target.closest('button[onclick*="toggleGlobalNavMenu"]')) {
         document.querySelectorAll('.floating-nav-menu').forEach(m => m.style.display = 'none');
     }
 });

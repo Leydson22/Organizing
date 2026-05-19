@@ -10,11 +10,13 @@
         display: flex;
         flex-direction: column;
         height: 100vh;
+        min-height: 0;
     }
     .main-content {
         display: flex;
         flex: 1;
         overflow: hidden;
+        min-height: 0;
         padding: 0;
         background: #000;
     }
@@ -103,21 +105,54 @@
 <body>
 
 <div class="player-container">
-    <header class="header">
+    <header class="header" style="position: relative;">
         <div class="logo" onclick="window.location.href='/'" style="cursor: pointer;">
             SCAN<span>VID</span>
         </div>
         
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="nav-buttons" style="display: flex; gap: 10px; align-items: center;">
-                <a href="/?openCurso={{ nome_curso | urlencode }}" class="btn btn-secondary">
-                    <span>📚</span> MÓDULOS
-                </a>
-                <button onclick="window.history.back()" class="btn btn-secondary">
-                    <span>↩️</span> VOLTAR
+        <div class="header-right-buttons" style="position: absolute; right: 0; top: 0; bottom: 0; width: 380px; min-width: 380px; display: flex; align-items: center; justify-content: space-between; padding-left: 25px; padding-right: 25px; z-index: 1000;">
+            <div class="nav-buttons" style="display: flex; gap: 10px; align-items: center; position: relative; z-index: 10000;">
+                <button onclick="togglePlayerNavMenu(event)" class="btn btn-secondary btn-menu-pulse" style="font-size: 13px; font-weight: 800; gap: 8px; border-radius: 12px; height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px;" title="Menu de Navegação">
+                    <span class="menu-icon">☰</span> MENU
                 </button>
             </div>
             <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px; height: 42px;">🌗</button>
+            <a href="/config" class="btn btn-primary" title="Configurações">
+                <span>⚙️</span> CONFIGS
+            </a>
+        </div>
+
+        <!-- Menu Flutuante de Navegação do Player -->
+        <div id="player-nav-menu" class="floating-nav-menu" style="display: none; position: absolute; top: 70px; right: 0 !important; left: auto !important; width: 380px; min-width: 380px; border-radius: 0 0 0 16px; border-top: none; padding: 25px; z-index: 999999;">
+            <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Navegação</h4>
+            <ul>
+                <li>
+                    <a href="/">
+                        <span>🏠</span> INÍCIO
+                    </a>
+                </li>
+                <li>
+                    <a href="/?openCurso={{ nome_curso | urlencode }}">
+                        <span>📚</span> MÓDULOS
+                    </a>
+                </li>
+                <li>
+                    <a href="/?openCurso={{ nome_curso | urlencode }}&openCatName={{ categoria | urlencode }}" class="active">
+                        <span>📂</span> {{ categoria | upper }}
+                    </a>
+                </li>
+            </ul>
+            <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-top: 20px; margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Meus Cursos</h4>
+            <ul>
+                {% for curso_data in cursos %}
+                {% set c_name = curso_data.name %}
+                <li>
+                    <a href="/?openCurso={{ c_name | urlencode }}" class="{% if c_name == nome_curso %}active{% endif %}">
+                        <span>📚</span> {{ c_name | upper }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
     </header>
 
@@ -168,11 +203,27 @@
         localStorage.setItem('theme', isLight ? 'light' : 'dark');
     }
 
-    // Auto-scroll to active item
+    // Toggle player floating navigation menu
+    function togglePlayerNavMenu(event) {
+        if (event) event.stopPropagation();
+        const menu = document.getElementById('player-nav-menu');
+        if (menu) {
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('player-nav-menu');
+        if (menu && !event.target.closest('#player-nav-menu') && !event.target.closest('button[onclick*="togglePlayerNavMenu"]')) {
+            menu.style.display = 'none';
+        }
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
         const activeItem = document.querySelector('.playlist-item.active');
         if (activeItem) {
-            activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            activeItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
 </script>
