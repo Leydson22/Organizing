@@ -328,8 +328,8 @@ body.light-theme .learning-card:hover {
     -webkit-backdrop-filter: none !important;
 }
 
-.folder-card:hover .badge-item {
-    font-size: 13px; /* Aumenta o tamanho da fonte ao passar o mouse */
+.folder-card .badge-item:hover {
+    font-size: 13px; /* Aumenta o tamanho da fonte apenas ao passar o mouse sobre o distintivo */
     color: var(--accent-color) !important;
     background: transparent !important;
     border: none !important;
@@ -341,11 +341,11 @@ body.light-theme .learning-card:hover {
     animation: fadeIn 0.2s ease;
 }
 
-.folder-card:hover .badge-item .badge-count {
+.folder-card .badge-item:hover .badge-count {
     display: none;
 }
 
-.folder-card:hover .badge-item .badge-hover-text {
+.folder-card .badge-item:hover .badge-hover-text {
     display: inline;
 }
 
