@@ -311,8 +311,103 @@ if __name__ == '__main__':
     time.sleep(1)
     webbrowser.open('http://localhost:5000')
 
+    # Create a small modern Tkinter control window
     try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        pass
+        import tkinter as tk
+        
+        root = tk.Tk()
+        root.title("ScanVid Server")
+        root.resizable(False, False)
+        
+        # Center window on screen
+        window_width = 360
+        window_height = 160
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        position_top = int(screen_height/2 - window_height/2)
+        position_right = int(screen_width/2 - window_width/2)
+        root.geometry(f"{window_width}x{window_height}+{position_right}+{position_top}")
+        
+        # Modern Dark Styling
+        bg_color = "#1e1e2e"
+        fg_color = "#cdd6f4"
+        accent_color = "#89b4fa"
+        danger_color = "#f38ba8"
+        button_bg = "#313244"
+        button_fg = "#cdd6f4"
+        
+        root.configure(bg=bg_color)
+        
+        label = tk.Label(
+            root, 
+            text="ScanVid Server is Running", 
+            font=("Helvetica", 12, "bold"), 
+            bg=bg_color, 
+            fg=accent_color,
+            pady=12
+        )
+        label.pack()
+        
+        sublabel = tk.Label(
+            root, 
+            text="http://localhost:5000", 
+            font=("Consolas", 10), 
+            bg=bg_color, 
+            fg=fg_color,
+            pady=2
+        )
+        sublabel.pack()
+        
+        frame = tk.Frame(root, bg=bg_color)
+        frame.pack(pady=12)
+        
+        def open_browser():
+            webbrowser.open('http://localhost:5000')
+            
+        def close_app():
+            root.destroy()
+            sys.exit(0)
+            
+        btn_open = tk.Button(
+            frame, 
+            text="Abrir Navegador", 
+            command=open_browser, 
+            font=("Helvetica", 9, "bold"),
+            bg=button_bg,
+            fg=button_fg,
+            activebackground=accent_color,
+            activeforeground=bg_color,
+            bd=0,
+            padx=12,
+            pady=6,
+            cursor="hand2"
+        )
+        btn_open.grid(row=0, column=0, padx=8)
+        
+        btn_close = tk.Button(
+            frame, 
+            text="Encerrar", 
+            command=close_app, 
+            font=("Helvetica", 9, "bold"),
+            bg=danger_color,
+            fg=bg_color,
+            activebackground=button_bg,
+            activeforeground=danger_color,
+            bd=0,
+            padx=12,
+            pady=6,
+            cursor="hand2"
+        )
+        btn_close.grid(row=0, column=1, padx=8)
+        
+        # Handle close button of the window
+        root.protocol("WM_DELETE_WINDOW", close_app)
+        
+        root.mainloop()
+    except Exception as e:
+        # Fallback if Tkinter is not available (e.g. headless Linux without X server)
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
