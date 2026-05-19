@@ -10,6 +10,7 @@ __pycache__/
 
 # Config with personal paths (don't commit)
 config.json
+leiame.txt
 
 # Logs
 *.log

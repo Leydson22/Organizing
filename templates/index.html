@@ -11,18 +11,18 @@
 </head>
 <body>
 
-<header class="header" style="position: relative;">
-    <div class="logo" onclick="showHome()" style="cursor: pointer;">
+<header class="header">
+    <div class="logo" onclick="showHome()">
         SCAN<span>VID</span>
     </div>
 
     <div class="header-right-buttons" style="position: absolute; right: 0; top: 0; bottom: 0; width: 350px; min-width: 350px; display: flex; align-items: center; justify-content: space-between; padding-left: 25px; padding-right: 25px; z-index: 1000;">
         <div class="nav-buttons" style="display: flex; gap: 10px; align-items: center; position: relative; z-index: 10000;">
-            <button onclick="toggleGlobalNavMenu(event)" class="btn btn-secondary btn-menu-pulse" style="font-size: 13px; font-weight: 800; gap: 8px; border-radius: 12px; height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px;" title="Menu de Navegação">
+            <button onclick="toggleGlobalNavMenu(event)" class="btn btn-secondary btn-menu-pulse" title="Menu de Navegação">
                 <span class="menu-icon">☰</span> MENU
             </button>
         </div>
-        <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 8px 12px; height: 42px;">🌗</button>
+        <button onclick="toggleTheme()" class="btn btn-secondary" style="font-size: 18px; padding: 0 14px; width: 44px; height: 44px;">🌗</button>
         
         <a href="/config" class="btn btn-primary" title="Configurações">
             <span>⚙️</span> CONFIGS
@@ -30,13 +30,28 @@
     </div>
 
     <!-- Menu Flutuante de Navegação Global -->
-    <div id="global-nav-menu" class="floating-nav-menu" style="display: none; position: absolute; top: 70px; right: 0 !important; left: auto !important; width: 350px; min-width: 350px; border-radius: 0 0 0 16px; border-top: none; padding: 25px; z-index: 999999;">
-        <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Navegação</h4>
+    <div id="global-nav-menu" class="floating-nav-menu" style="display: none; position: absolute; top: 75px; right: 0 !important; left: auto !important; width: 350px; min-width: 350px; border-radius: 0 0 0 20px; border-top: none; padding: 25px; z-index: 999999;">
+        <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 15px; font-weight: 800; font-family: 'Outfit', sans-serif;">Navegação</h4>
         <ul>
             <li>
                 <a href="javascript:void(0)" id="nav-link-inicio" onclick="showHome(); document.getElementById('global-nav-menu').style.display='none';">
                     <span>🏠</span> INÍCIO
                 </a>
+            </li>
+            <li id="global-nav-menu-modules-item" style="display: none;">
+                <a href="javascript:void(0)" id="global-nav-menu-modules-link">
+                    <span>📚</span> MÓDULOS
+                </a>
+            </li>
+            <li id="global-nav-menu-cat-item" style="display: none;">
+                <a href="javascript:void(0)" id="global-nav-menu-cat-link">
+                    <span>📂</span> <span class="global-cat-name-placeholder">CATEGORIA</span>
+                </a>
+            </li>
+            <li id="global-nav-menu-subcat-item" style="display: none; padding: 6px 14px;">
+                <span style="display: flex; align-items: center; gap: 12px; color: var(--accent-color); font-size: 14px; font-weight: 600;">
+                    <span>📁</span> <span class="global-subcat-name-placeholder">SUBCATEGORIA</span>
+                </span>
             </li>
             <li>
                 <a href="/config">
@@ -44,7 +59,7 @@
                 </a>
             </li>
         </ul>
-        <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-top: 20px; margin-bottom: 12px; font-weight: 800; font-family: 'Outfit', sans-serif;">Meus Cursos</h4>
+        <h4 style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-top: 25px; margin-bottom: 15px; font-weight: 800; font-family: 'Outfit', sans-serif;">Meus Cursos</h4>
         <ul>
             {% for curso_data in cursos %}
             {% set c_name = curso_data.name %}
@@ -62,7 +77,11 @@
     <main class="main-content">
 
         <section class="welcome-section" id="welcome-section">
-            <h2 class="text-gradient" style="font-size: 36px; margin-bottom: 40px; text-align: center;">Seu aprendizado, seu ritmo.</h2>
+            <div style="text-align: center; margin-bottom: 50px; position: relative;">
+                <h2 class="text-gradient" style="font-size: 40px; margin-bottom: 12px; letter-spacing: -0.5px;">Seu aprendizado, seu ritmo.</h2>
+                <p style="color: var(--text-muted); font-size: 15px; max-width: 500px; margin: 0 auto; line-height: 1.6;">Gerencie e assista suas videoaulas locais em um painel inteligente de alto desempenho.</p>
+                <div style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: radial-gradient(circle, rgba(0, 99, 229, 0.08) 0%, transparent 70%); z-index: -1; pointer-events: none;"></div>
+            </div>
             
             <div class="learning-grid home-learning-grid" id="home-learning-grid">
                 {% for curso_data in cursos %}
@@ -72,19 +91,19 @@
                      data-path="{{ curso_data.path }}"
                      onclick="handleCardClick(event, '{{ loop.index }}', '{{ curso | replace('\'', '\\\'') }}')">
                     
-                    <div class="card-icon-box">
+                    <div class="card-icon-box" style="position: relative;">
                         {{ curso[0] | upper }}
-                        <i class="devicon-{{ curso | lower | replace(' ', '') }}-plain colored" style="position: absolute; font-size: 32px;"></i>
+                        <i class="devicon-{{ curso | lower | replace(' ', '') }}-plain colored" style="position: absolute; font-size: 30px;"></i>
                     </div>
                     
                     <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                        <h3 class="card-title">{{ curso }}</h3>
-                        <button onclick="startRename(event, this)" class="btn btn-secondary" style="padding: 4px 8px; font-size: 10px; opacity: 0.5;">✏️</button>
+                        <h3 class="card-title" style="text-transform: uppercase;">{{ curso }}</h3>
+                        <button onclick="startRename(event, this)" class="btn btn-secondary" style="padding: 4px; width: 32px; height: 32px; border-radius: 8px; opacity: 0.6;" title="Renomear Curso">✏️</button>
                     </div>
                     
                     <div class="rename-box" style="display: none; width: 100%; gap: 8px;">
-                        <input type="text" class="rename-input" value="{{ curso }}" style="flex: 1; padding: 8px; font-size: 12px; border-radius: 8px;">
-                        <button onclick="finishRename(event, this)" class="btn btn-primary" style="padding: 8px 12px;">OK</button>
+                        <input type="text" class="rename-input" value="{{ curso }}" style="flex: 1; padding: 8px 12px; font-size: 13px; font-weight: 600; border-radius: 10px; text-transform: uppercase;">
+                        <button onclick="finishRename(event, this)" class="btn btn-primary" style="padding: 0 14px; height: 36px; border-radius: 10px;">OK</button>
                     </div>
 
                     <p class="card-desc">Continue de onde parou no curso de {{ curso }}.</p>
@@ -105,10 +124,11 @@
                 {% endfor %}
             </div>
             {% if not cursos %}
-            <div class="glass" style="text-align: center; padding: 60px; border-radius: 24px; margin-top: 40px;">
-                <h2 style="font-size: 24px;">Sua biblioteca está vazia.</h2>
-                <p style="color: var(--text-muted); margin-bottom: 30px;">Comece adicionando seus diretórios de cursos nas configurações.</p>
-                <a href="/config" class="btn btn-primary">ADICIONAR CURSOS</a>
+            <div class="glass" style="text-align: center; padding: 70px 40px; border-radius: 24px; margin-top: 40px; border: 1.5px dashed var(--border-color);">
+                <div style="font-size: 48px; margin-bottom: 20px; filter: drop-shadow(0 4px 12px var(--accent-glow));">📚</div>
+                <h2 style="font-size: 26px; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">Sua biblioteca está vazia.</h2>
+                <p style="color: var(--text-muted); margin-bottom: 35px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.6;">Adicione seus diretórios de vídeo nas configurações para começar a organizar seus cursos locais.</p>
+                <a href="/config" class="btn btn-primary" style="height: 48px; padding: 0 30px;">ADICIONAR SEU PRIMEIRO CURSO</a>
             </div>
             {% endif %}
         </section>
@@ -156,16 +176,21 @@
             <div class="learning-grid category-grid" id="grid-curso-{{ curso_index }}">
                 {% for categoria, videos in cats.items() %}
                 {% set cat_index = loop.index %}
-                <div class="learning-card folder-card" onclick="showCategory('{{ curso_index }}', '{{ cat_index }}')" style="min-height: 160px; justify-content: center;">
-                    <div class="lang-icon" style="font-size: 40px; color: var(--accent-color); margin-bottom: 10px;">
+                <div class="learning-card folder-card" onclick="showCategory('{{ curso_index }}', '{{ cat_index }}')" style="min-height: 120px; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding: 20px; position: relative; gap: 10px;">
+                    <!-- Badge de Vídeos no topo direito -->
+                    <div class="badge-item" style="position: absolute; top: 12px; right: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 0;">
+                        <span>📽️</span>
+                        <span class="badge-count">{{ videos|length }}</span>
+                        <span class="badge-hover-text" style="font-size: 10px; font-weight: 600; color: var(--text-muted);">este módulo apresenta {{ videos|length }} vídeos</span>
+                    </div>
+
+                    <!-- Ícone no topo esquerdo -->
+                    <div class="lang-icon" style="font-size: 24px; color: var(--accent-color); margin: 0; display: block;">
                         <i class="devicon-{{ categoria | lower | replace(' ', '') }}-plain colored"></i>
                     </div>
-                    
-                    <h3 class="card-title" style="font-size: 16px;">{{ categoria }}</h3>
-                    
-                    <div class="badge-item" style="position: absolute; bottom: 20px; right: 20px;">
-                        <span>📽️</span> {{ videos|length }} Vídeos
-                    </div>
+
+                    <!-- Título no topo esquerdo -->
+                    <h3 class="card-title" style="font-size: 14px; line-height: 1.4; margin: 4px 0 0 0; font-weight: 700; color: var(--text-color); text-align: left; width: calc(100% - 30px); text-transform: uppercase;">{{ categoria }}</h3>
                 </div>
                 {% endfor %}
             </div>
@@ -189,12 +214,19 @@
                         {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
                         {% if subcategoria %}
                         {% set sub_idx.val = sub_idx.val + 1 %}
-                        <div class="learning-card folder-card" onclick="showSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx.val }}', '{{ categoria | replace('\'', '\\\'') }}', '{{ subcategoria | replace('\'', '\\\'') }}')" style="min-height: 160px; justify-content: center;">
-                            <div style="font-size: 40px; color: var(--accent-color); margin-bottom: 10px;">📁</div>
-                            <h3 class="card-title" style="font-size: 16px;">{{ subcategoria }}</h3>
-                            <div class="badge-item" style="position: absolute; bottom: 20px; right: 20px;">
-                                <span>📽️</span> {{ subvideos|length }} Vídeos
+                        <div class="learning-card folder-card" onclick="showSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx.val }}', '{{ categoria | replace('\'', '\\\'') }}', '{{ subcategoria | replace('\'', '\\\'') }}')" style="min-height: 120px; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding: 20px; position: relative; gap: 10px;">
+                            <!-- Badge de Vídeos no topo direito -->
+                            <div class="badge-item" style="position: absolute; top: 12px; right: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 0;">
+                                <span>📽️</span>
+                                <span class="badge-count">{{ subvideos|length }}</span>
+                                <span class="badge-hover-text" style="font-size: 10px; font-weight: 600; color: var(--text-muted);">este módulo apresenta {{ subvideos|length }} vídeos</span>
                             </div>
+
+                            <!-- Ícone no topo esquerdo -->
+                            <div style="font-size: 24px; color: var(--accent-color); margin: 0; display: block;">📁</div>
+
+                            <!-- Título no topo esquerdo -->
+                            <h3 class="card-title" style="font-size: 14px; line-height: 1.4; margin: 4px 0 0 0; font-weight: 700; color: var(--text-color); text-align: left; width: calc(100% - 30px); text-transform: uppercase;">{{ subcategoria }}</h3>
                         </div>
                         {% endif %}
                         {% endfor %}
@@ -420,6 +452,14 @@ function showHome() {
     let navInicio = document.getElementById('nav-link-inicio');
     if(navInicio) navInicio.classList.add('active');
     
+    // Hide global nav menu course breadcrumbs
+    const globalModulesItem = document.getElementById('global-nav-menu-modules-item');
+    const globalCatItem = document.getElementById('global-nav-menu-cat-item');
+    const globalSubcatItem = document.getElementById('global-nav-menu-subcat-item');
+    if (globalModulesItem) globalModulesItem.style.display = 'none';
+    if (globalCatItem) globalCatItem.style.display = 'none';
+    if (globalSubcatItem) globalSubcatItem.style.display = 'none';
+    
     window.scrollTo(0, 0);
 }
 
@@ -472,6 +512,14 @@ function showCurso(index, cursoNome, noScroll) {
     if (modulesItem) modulesItem.style.display = 'none';
     if (catItem) catItem.style.display = 'none';
     if (subcatItem) subcatItem.style.display = 'none';
+    
+    // Also hide from global nav menu
+    const globalModulesItem = document.getElementById('global-nav-menu-modules-item');
+    const globalCatItem = document.getElementById('global-nav-menu-cat-item');
+    const globalSubcatItem = document.getElementById('global-nav-menu-subcat-item');
+    if (globalModulesItem) globalModulesItem.style.display = 'none';
+    if (globalCatItem) globalCatItem.style.display = 'none';
+    if (globalSubcatItem) globalSubcatItem.style.display = 'none';
     
     // Reset the sticky header title back to the base course name
     const titleEl = document.getElementById('curso-title-' + index);
@@ -528,6 +576,21 @@ function showCategory(cursoIndex, catIndex) {
     // Sync the floating navigation menu for Category level!
     const modulesItem = document.getElementById('nav-menu-modules-item-' + cursoIndex);
     if (modulesItem) modulesItem.style.display = 'block';
+    
+    // Also sync the global floating menu
+    const globalModulesItem = document.getElementById('global-nav-menu-modules-item');
+    const globalModulesLink = document.getElementById('global-nav-menu-modules-link');
+    if (globalModulesItem) globalModulesItem.style.display = 'block';
+    if (globalModulesLink) {
+        globalModulesLink.onclick = function() {
+            showCurso(cursoIndex, localStorage.getItem('lastCursoNome'));
+            document.getElementById('global-nav-menu').style.display = 'none';
+        };
+    }
+    const globalCatItem = document.getElementById('global-nav-menu-cat-item');
+    const globalSubcatItem = document.getElementById('global-nav-menu-subcat-item');
+    if (globalCatItem) globalCatItem.style.display = 'none';
+    if (globalSubcatItem) globalSubcatItem.style.display = 'none';
     
     const catItem = document.getElementById('nav-menu-cat-item-' + cursoIndex);
     const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
@@ -607,6 +670,32 @@ function showSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName) {
     const modulesItem = document.getElementById('nav-menu-modules-item-' + cursoIndex);
     if (modulesItem) modulesItem.style.display = 'block';
     
+    // Also sync the global floating menu
+    const globalModulesItem = document.getElementById('global-nav-menu-modules-item');
+    const globalModulesLink = document.getElementById('global-nav-menu-modules-link');
+    if (globalModulesItem) globalModulesItem.style.display = 'block';
+    if (globalModulesLink) {
+        globalModulesLink.onclick = function() {
+            showCurso(cursoIndex, localStorage.getItem('lastCursoNome'));
+            document.getElementById('global-nav-menu').style.display = 'none';
+        };
+    }
+    const globalCatItem = document.getElementById('global-nav-menu-cat-item');
+    const globalCatLink = document.getElementById('global-nav-menu-cat-link');
+    if (globalCatItem) {
+        globalCatItem.style.display = 'block';
+        const nameSpan = globalCatItem.querySelector('.global-cat-name-placeholder');
+        if (nameSpan) nameSpan.innerText = catName.toUpperCase();
+        if (globalCatLink) {
+            globalCatLink.onclick = function() {
+                showCategory(cursoIndex, catIndex);
+                document.getElementById('global-nav-menu').style.display = 'none';
+            };
+        }
+    }
+    const globalSubcatItem = document.getElementById('global-nav-menu-subcat-item');
+    if (globalSubcatItem) globalSubcatItem.style.display = 'none';
+    
     const catItem = document.getElementById('nav-menu-cat-item-' + cursoIndex);
     const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
     if (catItem) {
@@ -655,6 +744,12 @@ function hideSubcat(cursoIndex, catIndex) {
     // Hide subcat item from floating menu
     const subcatItem = document.getElementById('nav-menu-subcat-item-' + cursoIndex);
     if (subcatItem) subcatItem.style.display = 'none';
+    
+    // Also sync the global floating menu
+    const globalSubcatItem = document.getElementById('global-nav-menu-subcat-item');
+    if (globalSubcatItem) globalSubcatItem.style.display = 'none';
+    const globalCatItem = document.getElementById('global-nav-menu-cat-item');
+    if (globalCatItem) globalCatItem.style.display = 'none';
     
     // Reset header to category name
     const titleEl = document.getElementById('curso-title-' + cursoIndex);
