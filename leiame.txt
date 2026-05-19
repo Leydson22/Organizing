@@ -1,0 +1,69 @@
+========================================================================
+                      SCANVID - PREMIUM REDESIGN (v2.0)
+========================================================================
+Este arquivo detalha as alterações visuais de alta fidelidade e as
+melhorias de UX/UI implementadas no aplicativo ScanVid. As modificações
+foram feitas visando uma estética moderna e limpa ("Glassmorphism"),
+adém de padronizar cores e layouts de forma responsiva.
+
+Data: 19 de Maio de 2026
+Versão de Entrega: v2.0-redesign (CSS v2.0)
+------------------------------------------------------------------------
+
+RESUMO DAS ALTERAÇÕES POR ARQUIVO:
+
+1. [static/style.css]
+   - Reformulado do zero com um novo sistema de variáveis semânticas HSL.
+   - Tema Escuro ("Espacial/Disney+"): Fundo radial em degrade cósmico
+     escuro, contornos brilhantes em tons de azul e violeta translúcido.
+   - Tema Claro ("Sand & Sage"): Tons refinados de areia e sálvia fosco,
+     com alta legibilidade, contraste aprimorado e estética premium.
+   - Adicionadas classes globais de "Glassmorphism" com 'backdrop-filter:
+     blur()' para cabeçalhos, painéis laterais e menus flutuantes.
+   - Efeitos hover refinados com transições suaves (0.3s cubic-bezier)
+     e escalas sutis de transformação nos cards de cursos/vídeos.
+   - Nova barra de progresso e barra de rolagem personalizadas e discretas.
+   - Ajustado o recuo do sub-menu (.explorer-videos) de 50px para 20px para alinhar de forma equilibrada e aproximar as videoaulas e subcategorias do título principal do módulo (Ajuste Visual).
+
+2. [templates/index.html]
+   - Cabeçalho aprimorado com logo central e botões estruturados sob medida.
+   - Adicionado painel de boas-vindas com gradiente radial e título em
+     degrade de alta resolução ("Seu aprendizado, seu ritmo.").
+   - Cards de curso renovados: Remoção de estilos em linha redundantes;
+     ícone do card dinâmico de linguagem em sintonia com a inicial do curso;
+     adição de contornos e tags (Badges) com total de módulos e vídeos.
+   - Nova caixa de diálogo e feedback para quando a biblioteca estiver
+     vazia, incentivando o usuário com botão de ação rápida.
+   - **Correção e Sincronização de Menus Flutuantes**: O menu flutuante global (`#global-nav-menu`, aberto através do botão "MENU" no canto superior direito) agora sincroniza dinamicamente as opções de breadcrumbs (`MÓDULOS`, `📂 CATEGORIA`, `📁 SUBCATEGORIA`) quando um curso e módulo/categoria estão ativos. Isso resolve a inconsistência relatada onde o menu flutuante esquerdo do curso exibia os módulos, mas o menu flutuante superior direito não exibia.
+   - **Novo Design dos Cartões de Pasta/Módulos (.folder-card) - Minimalista e Premium**:
+     - Removida a palavra descritiva "Vídeos" do distintivo para manter apenas o ícone `📽️` seguido da contagem numérica de vídeos (ex: `📽️ 20`), resultando em um visual muito limpo e moderno.
+     - Aumentado o tamanho do distintivo e da fonte para `13px` com peso `700` (negrito), tornando-o mais destacado e legível.
+     - O distintivo de contagem de vídeos foi movido de forma absoluta para a extremidade superior direita do cartão (`top: 20px; right: 20px;`).
+     - O ícone da linguagem de programação fica posicionado na extremidade superior esquerda.
+     - O título do módulo (`h3.card-title`) fica posicionado no rodapé esquerdo do cartão, perfeitamente balanceado e com amplo espaço livre, impossibilitando qualquer risco de sobreposição com o distintivo de contagem de vídeos.
+     - **Melhoria no Comportamento da Barra Lateral (Sidebar)**: Ao clicar no título da barra lateral com um curso ativo, a aplicação agora retorna de forma inteligente para os módulos do próprio curso, em vez de voltar para a biblioteca geral.
+     - **Recolhimento Automático**: Ao voltar para a raiz do curso (módulos), todos os submenus expandidos na barra lateral são automaticamente recolhidos, as setas são resetadas à posição inicial, e a barra lateral rola automaticamente de volta para o topo (primeiro módulo da seleção).
+
+3. [templates/player.html]
+   - O reprodutor de vídeo agora possui o visual "Cinema Theater", com
+     bordas arredondadas e contorno em glassmorphism brilhante com sombra 3D.
+   - Lista lateral de reprodução aprimorada: Transição mais limpa, indicador
+     azul-neon discreto do lado esquerdo da aula atualmente ativa.
+   - Redução de margens redundantes e melhor aproveitamento do espaço em
+     monitores de alta resolução.
+
+4. [templates/config.html]
+   - Estilização completa do painel de diretórios com cartões glassmorphic.
+   - Inputs de texto modernos com focos brilhantes no acento neon azul e
+     alças (drag handles) para arrastar mais visíveis e limpas.
+   - Botões de remover pastas estilizados com transparências avermelhadas
+     reagindo ao passar do cursor (hover vermelho brilhante).
+
+------------------------------------------------------------------------
+SUGESTÃO DE MENSAGEM DE COMMIT (.git):
+------------------------------------------------------------------------
+Se você for realizar um commit destas mudanças, sugerimos a mensagem:
+
+git commit -m "feat(ui): implement sidebar auto-collapse and smart return to course root v2.4.0" -m "Ajusta clique no título da sidebar para retornar aos módulos do curso ativo, recolhe submenus abertos automaticamente e rola sidebar para o topo garantindo que o primeiro módulo esteja em foco."
+========================================================================
+========================================================================
