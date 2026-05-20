@@ -628,8 +628,8 @@
 
             if (!noScroll) {
                 window.scrollTo(0, 0);
-                const sidebarEl = document.getElementById('sidebar');
-                if (sidebarEl) sidebarEl.scrollTop = 0;
+                const explorerMenu = document.querySelector(`#menu-curso-${index} .explorer-menu`);
+                if (explorerMenu) explorerMenu.scrollTop = 0;
             }
         }
 
