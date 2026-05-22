@@ -1,4 +1,19 @@
 ========================================================================
+                      SCANVID - PREMIUM REDESIGN (v2.5.0)
+========================================================================
+Versão 2.5.0 - Sincronia de Menus e Ordenação do Player
+- Implementada sincronização perfeita bidirecional entre a grade de 
+  módulos principal (esquerda) e o menu lateral explorador (direita).
+- Subcategorias no menu lateral agora são clicáveis e expansíveis, 
+  refletindo instantaneamente na interface principal.
+- Adicionado histórico de seleção de vídeo no LocalStorage: ao retornar 
+  do player para a tela inicial, a tela e o menu lateral expandem 
+  exatamente onde você parou, destacando o vídeo ativo.
+- Corrigida a ordenação de módulos no player e na página inicial: as 
+  subcategorias agora são ordenadas corretamente pelo seu nome no 
+  sistema de arquivos em conjunto com os nomes dos vídeos.
+
+========================================================================
                       SCANVID - PREMIUM REDESIGN (v2.0)
 ========================================================================
 Este arquivo detalha as alterações visuais de alta fidelidade e as
@@ -11,6 +26,7 @@ Versão de Entrega: v2.0-redesign (CSS v2.0)
 ------------------------------------------------------------------------
 
 RESUMO DAS ALTERAÇÕES POR ARQUIVO:
+
 
 1. [static/style.css]
    - Reformulado do zero com um novo sistema de variáveis semânticas HSL.

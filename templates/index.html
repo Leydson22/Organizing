@@ -304,8 +304,9 @@
                         {% endif %}
                         <div class="learning-grid">
                             {% for video in subvideos %}
-                            <a class="learning-card"
+                            <a class="learning-card video-card" data-filepath="{{ video.filepath }}"
                                 href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}"
+                                onclick="saveNavigationState('{{ curso_index }}', '{{ cat_index }}', '0', '{{ video.filepath | replace('\\', '\\\\') | replace('\'', '\\\'') }}')"
                                 style="padding: 20px; flex-direction: row; align-items: center; gap: 20px;">
                                 <div class="card-icon-box"
                                     style="width: 44px; height: 44px; font-size: 16px; flex-shrink: 0;">▶</div>
@@ -330,8 +331,9 @@
                             📁 {{ subcategoria }}</h4>
                         <div class="learning-grid">
                             {% for video in subvideos %}
-                            <a class="learning-card"
+                            <a class="learning-card video-card" data-filepath="{{ video.filepath }}"
                                 href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}"
+                                onclick="saveNavigationState('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx2.val }}', '{{ video.filepath | replace('\\', '\\\\') | replace('\'', '\\\'') }}')"
                                 style="padding: 20px; flex-direction: row; align-items: center; gap: 20px;">
                                 <div class="card-icon-box"
                                     style="width: 44px; height: 44px; font-size: 16px; flex-shrink: 0;">▶</div>
@@ -376,25 +378,46 @@
                             <span class="cat-arrow">▶</span>
                             <span>{{ categoria }}</span>
                         </div>
-                        <ul class="explorer-videos" id="menu-cat-{{ curso_index }}-{{ cat_index }}">
+                        <ul class="explorer-videos" id="menu-cat-{{ curso_index }}-{{ cat_index }}" style="display: none;">
+                            {% set sub_idx_side = namespace(val=0) %}
                             {% for subcategoria, subvideos in videos|groupby('subcategoria') %}
                             {% if subcategoria %}
-                            <li
-                                style="padding: 6px 12px; color: var(--accent-color); font-size: 11px; font-weight: 600; opacity: 0.7;">
-                                📁 {{ subcategoria }}</li>
-                            {% endif %}
+                            {% set sub_idx_side.val = sub_idx_side.val + 1 %}
+                            <li>
+                                <div class="explorer-subcat"
+                                    onclick="toggleSidebarSubcat('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx_side.val }}', '{{ categoria | replace('\'', '\\\'') }}', '{{ subcategoria | replace('\'', '\\\'') }}', this)"
+                                    style="padding: 6px 12px 6px 10px; color: var(--accent-color); font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s;">
+                                    <span class="subcat-arrow" style="transition: transform 0.3s; display: inline-block;">▶</span>
+                                    📁 <span style="flex: 1;">{{ subcategoria }}</span>
+                                </div>
+                                <ul class="explorer-subvideos" id="menu-subcat-{{ curso_index }}-{{ cat_index }}-{{ sub_idx_side.val }}" style="display: none;">
+                                    {% for video in subvideos %}
+                                    <li style="padding-left: 26px;">
+                                        <a href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}"
+                                            onclick="saveNavigationState('{{ curso_index }}', '{{ cat_index }}', '{{ sub_idx_side.val }}', '{{ video.filepath | replace('\\', '\\\\') | replace('\'', '\\\'') }}')"
+                                            class="video-link" data-filepath="{{ video.filepath }}" title="{{ video.nome }}">
+                                            🎬 {{ video.nome }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            {% else %}
+                            <!-- Vídeos diretos na categoria -->
                             {% for video in subvideos %}
-                            <li{% if subcategoria %} style="padding-left: 24px;" {% endif %}>
+                            <li style="padding-left: 10px;">
                                 <a href="/player/{{ video.filepath | urlencode }}?categoria={{ categoria | urlencode }}"
-                                    title="{{ video.nome }}">
+                                    onclick="saveNavigationState('{{ curso_index }}', '{{ cat_index }}', '0', '{{ video.filepath | replace('\\', '\\\\') | replace('\'', '\\\'') }}')"
+                                    class="video-link" data-filepath="{{ video.filepath }}" title="{{ video.nome }}">
                                     🎬 {{ video.nome }}
                                 </a>
+                            </li>
+                            {% endfor %}
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
                     </li>
                     {% endfor %}
-                    {% endfor %}
-                </ul>
-                </li>
-                {% endfor %}
                 </ul>
             </div>
             {% endfor %}
@@ -449,10 +472,12 @@
                 }
             }
 
-            // Fallback para LocalStorage se não houver hash
             const lastIndex = localStorage.getItem('lastCursoIndex');
             const lastNome = localStorage.getItem('lastCursoNome');
             const lastCatIndex = localStorage.getItem('lastCatIndex');
+            const lastSubcatIndex = localStorage.getItem('lastSubcatIndex');
+            const lastVideo = localStorage.getItem('lastVideoPath');
+            
             if (lastIndex && lastNome) {
                 const container = Array.from(document.querySelectorAll('.curso-container')).find(c => c.getAttribute('data-nome').trim() === lastNome.trim());
                 if (container) {
@@ -467,8 +492,38 @@
                             const icon = menu.previousElementSibling.querySelector('.toggle-icon');
                             if (icon) icon.innerText = "▲";
                         }
+                        
+                        // Check subcategory
+                        if (lastSubcatIndex && lastSubcatIndex !== '0') {
+                            const subcatMenu = document.getElementById(`menu-subcat-${index}-${lastCatIndex}-${lastSubcatIndex}`);
+                            if (subcatMenu) {
+                                const subcatDiv = subcatMenu.previousElementSibling;
+                                if (subcatDiv) {
+                                    // Simulated click logic to open it
+                                    subcatMenu.style.display = 'block';
+                                    subcatDiv.classList.add('active-subcat');
+                                    const arrow = subcatDiv.querySelector('.subcat-arrow');
+                                    if (arrow) arrow.style.transform = 'rotate(90deg)';
+                                    
+                                    // Find names for left side
+                                    let catName = "Categoria";
+                                    let subName = "Subcategoria";
+                                    const h3 = document.querySelector(`#section-cat-${index}-${lastCatIndex} h3`);
+                                    if(h3) catName = h3.innerText;
+                                    const h4 = document.querySelector(`#subcat-${index}-${lastCatIndex}-${lastSubcatIndex} h4`);
+                                    if(h4) subName = h4.innerText.replace('📁 ', '');
+                                    
+                                    showSubcat(index, lastCatIndex, lastSubcatIndex, catName, subName, true);
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            
+            // Highlight selected video
+            if (lastVideo) {
+                highlightVideo(lastVideo);
             }
         }
 
@@ -601,7 +656,7 @@
             });
 
             // Resetar sidebar
-            var sidebarItems = document.querySelectorAll(`#menu-curso-${index} > li`);
+            var sidebarItems = document.querySelectorAll(`#menu-curso-${index} > .explorer-menu > li`);
             sidebarItems.forEach(li => li.style.display = 'block');
 
             // Hide modules item and dynamic category/subcategory elements from floating menu since we are on the course home (modules grid)
@@ -659,7 +714,10 @@
             }
         }
 
-        function showCategory(cursoIndex, catIndex) {
+        function showCategory(cursoIndex, catIndex, noScroll) {
+            localStorage.setItem('lastCatIndex', catIndex);
+            localStorage.removeItem('lastSubcatIndex');
+            
             // === LEFT SIDE: show the video list ===
             const grid = document.getElementById('grid-curso-' + cursoIndex);
             if (grid) grid.style.display = 'none';
@@ -742,10 +800,21 @@
                         catDiv.classList.add('active-cat');
                         const arrow = catDiv.querySelector('.cat-arrow');
                         if (arrow) arrow.style.transform = 'rotate(90deg)';
+                        
+                        // Close any open subcategories in other categories to keep it clean
+                        document.querySelectorAll('#menu-curso-' + cursoIndex + ' .explorer-subvideos').forEach(subv => subv.style.display = 'none');
+                        document.querySelectorAll('#menu-curso-' + cursoIndex + ' .active-subcat').forEach(subcat => {
+                            subcat.classList.remove('active-subcat');
+                            const subArrow = subcat.querySelector('.subcat-arrow');
+                            if (subArrow) subArrow.style.transform = 'rotate(0deg)';
+                        });
+                        
                         // Scroll the sidebar to bring the active item into view
-                        setTimeout(() => {
-                            catDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 80);
+                        if (!noScroll) {
+                            setTimeout(() => {
+                                catDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 80);
+                        }
                     }
                 }
             }
@@ -830,7 +899,115 @@
                 titleEl.innerText = baseName + ' - ' + catName + ' - ' + subcatName;
             }
 
-            window.scrollTo(0, 0);
+            // === RIGHT SIDE: highlight and scroll to the active subcategory ===
+            document.querySelectorAll('#menu-cat-' + cursoIndex + '-' + catIndex + ' .explorer-subcat')
+                .forEach(subcat => {
+                    subcat.classList.remove('active-subcat');
+                    const subArrow = subcat.querySelector('.subcat-arrow');
+                    if(subArrow) subArrow.style.transform = 'rotate(0deg)';
+                });
+            
+            const sidebarSubmenu = document.getElementById('menu-subcat-' + cursoIndex + '-' + catIndex + '-' + subcatIndex);
+            if (sidebarSubmenu) {
+                sidebarSubmenu.style.display = 'block';
+                const subcatDiv = sidebarSubmenu.previousElementSibling;
+                if (subcatDiv && subcatDiv.classList.contains('explorer-subcat')) {
+                    subcatDiv.classList.add('active-subcat');
+                    const arrow = subcatDiv.querySelector('.subcat-arrow');
+                    if (arrow) arrow.style.transform = 'rotate(90deg)';
+                    
+                    if (arguments.length < 6 || !arguments[5]) { // If not noScroll
+                        setTimeout(() => {
+                            subcatDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 80);
+                    }
+                }
+            }
+
+            if (arguments.length < 6 || !arguments[5]) {
+                window.scrollTo(0, 0);
+            }
+        }
+        
+        function toggleSidebarSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName, headerEl) {
+            const submenu = document.getElementById('menu-subcat-' + cursoIndex + '-' + catIndex + '-' + subcatIndex);
+            if (!submenu) return;
+
+            const isOpen = submenu.style.display === 'block';
+
+            if (isOpen) {
+                // Just close: collapse sidebar item
+                submenu.style.display = 'none';
+                const arrow = headerEl.querySelector('.subcat-arrow');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+                headerEl.classList.remove('active-subcat');
+                
+                // Hide subcat content on the left, restore category content
+                hideSubcat(cursoIndex, catIndex);
+            } else {
+                // Open: sync both sides (show video list on left + highlight on right)
+                localStorage.setItem('lastSubcatIndex', subcatIndex);
+                showSubcat(cursoIndex, catIndex, subcatIndex, catName, subcatName);
+            }
+        }
+        
+        function saveNavigationState(cursoIndex, catIndex, subcatIndex, videoPath) {
+            localStorage.setItem('lastCursoIndex', cursoIndex);
+            localStorage.setItem('lastCatIndex', catIndex);
+            if (subcatIndex && subcatIndex !== '0') {
+                localStorage.setItem('lastSubcatIndex', subcatIndex);
+            } else {
+                localStorage.removeItem('lastSubcatIndex');
+            }
+            localStorage.setItem('lastVideoPath', videoPath);
+            highlightVideo(videoPath);
+        }
+        
+        function highlightVideo(videoPath) {
+            // Remove previous highlights
+            document.querySelectorAll('.video-link, .video-card').forEach(el => {
+                el.classList.remove('active-video');
+                el.style.borderLeft = '';
+                el.style.background = '';
+            });
+            
+            // Highlight in sidebar
+            const sidebarLinks = document.querySelectorAll(`.video-link[data-filepath="${videoPath}"]`);
+            sidebarLinks.forEach(link => {
+                link.classList.add('active-video');
+                link.style.color = 'var(--accent-color)';
+                link.style.fontWeight = 'bold';
+                
+                // Ensure parent folders are open
+                const subMenu = link.closest('.explorer-subvideos');
+                if (subMenu) {
+                    subMenu.style.display = 'block';
+                    const subDiv = subMenu.previousElementSibling;
+                    if(subDiv) {
+                        subDiv.classList.add('active-subcat');
+                        const arr = subDiv.querySelector('.subcat-arrow');
+                        if(arr) arr.style.transform = 'rotate(90deg)';
+                    }
+                }
+                const catMenu = link.closest('.explorer-videos');
+                if (catMenu) {
+                    catMenu.style.display = 'block';
+                    const catDiv = catMenu.previousElementSibling;
+                    if(catDiv) {
+                        catDiv.classList.add('active-cat');
+                        const arr = catDiv.querySelector('.cat-arrow');
+                        if(arr) arr.style.transform = 'rotate(90deg)';
+                    }
+                }
+            });
+            
+            // Highlight in grid
+            const gridCards = document.querySelectorAll(`.video-card[data-filepath="${videoPath}"]`);
+            gridCards.forEach(card => {
+                card.classList.add('active-video');
+                card.style.borderLeft = '4px solid var(--accent-color)';
+                card.style.background = 'rgba(0, 99, 229, 0.1)';
+            });
         }
 
         function hideSubcat(cursoIndex, catIndex) {

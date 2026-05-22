@@ -39,7 +39,10 @@ VIDEO_DIRS = load_video_dirs()
 VIDEO_EXTENSIONS = ('.mp4', '.mkv', '.avi', '.mov', '.webm')
 
 def natural_sort_key(s):
-    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s['nome'])]
+    sub = s.get('subcategoria', '')
+    nome = s.get('nome', '')
+    combined = f"{sub}/{nome}" if sub else nome
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', combined)]
 
 def scan_videos():
     global VIDEO_DIRS
@@ -476,6 +479,17 @@ if __name__ == '__main__':
     t.daemon = True
     t.start()
 
+    def auto_open_browser():
+        time.sleep(1.0)
+        dirs = load_video_dirs()
+        if not dirs:
+            url = f'http://localhost:{PORT}/config'
+        else:
+            url = f'http://localhost:{PORT}/#'
+        webbrowser.open(url)
+
+    threading.Thread(target=auto_open_browser, daemon=True).start()
+
     # Create a small modern Tkinter control window
     try:
         import tkinter as tk
@@ -483,6 +497,9 @@ if __name__ == '__main__':
         root = tk.Tk()
         root.title("ScanVid Server")
         root.resizable(False, False)
+        root.attributes('-topmost', True)
+        root.lift()
+        root.focus_force()
         
         # Center window on screen
         window_width = 360
@@ -527,7 +544,12 @@ if __name__ == '__main__':
         frame.pack(pady=12)
         
         def open_browser():
-            webbrowser.open(f'http://localhost:{PORT}')
+            dirs = load_video_dirs()
+            if not dirs:
+                url = f'http://localhost:{PORT}/config'
+            else:
+                url = f'http://localhost:{PORT}/#'
+            webbrowser.open(url)
             
         def close_app():
             root.destroy()
